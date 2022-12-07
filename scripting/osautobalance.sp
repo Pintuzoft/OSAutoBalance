@@ -14,17 +14,15 @@ public Plugin myinfo = {
 	url = "https://github.com/Pintuzoft/OSAutoBalance"
 }
 
-enum struct GameInfo {
-   int scoreT;
-   int scoreCT;
-   int playersT;
-   int playersCT;
-   int streakT;
-   int streakCT; 
-   int bestPlayer;
-   int worstPlayer;
-}
-GameInfo gameInfo;
+int scoreT;
+int scoreCT;
+int playersT;
+int playersCT;
+int streakT;
+int streakCT; 
+int bestPlayer;
+int worstPlayer;
+
 
 public void OnPluginStart() {
 	cvar_OSTeamBalance = CreateConVar("os_autobalance", 1, "Enable autobalance", _, true, 1.0);
@@ -37,73 +35,73 @@ public void OnPluginStart() {
 }
 
 public void Event_GameStart ( Event event, const char[] name, bool dontBroadcast ) {
-    gameInfo.scoreT = 0;
-    gameInfo.scoreCT = 0;
-    gameInfo.streakT = 0;
-    gameInfo.streakCT = 0;
-    gameInfo.bestPlayer = 0;
-    gameInfo.worstPlayer = 0;
+    scoreT = 0;
+    scoreCT = 0;
+    streakT = 0;
+    streakCT = 0;
+    bestPlayer = 0;
+    worstPlayer = 0;
 }
 
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
     PrintToConsoleAll("OSTeamBalance: %d", cvar_OSTeamBalance.IntValue );
     PrintToConsoleAll("MinPlayers: %d", cvar_MinPlayers.IntValue );
     PrintToConsoleAll("BalanceAfterStreak: %d", cvar_BalanceAfterStreak.IntValue );
-    if ( gameInfo.bestPlayer != -1 ) {
-        unShieldPlayer ( gameInfo.bestPlayer );
-        gameInfo.bestPlayer = -1;
+    if ( bestPlayer != -1 ) {
+        unShieldPlayer ( bestPlayer );
+        bestPlayer = -1;
     }
-    if ( gameInfo.worstPlayer != -1 ) {
-        unShieldPlayer ( gameInfo.worstPlayer );
-        gameInfo.worstPlayer = -1;
+    if ( worstPlayer != -1 ) {
+        unShieldPlayer ( worstPlayer );
+        worstPlayer = -1;
     }
 }
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
-    if (gameInfo.scoreT == null ) {
-        gameInfo.scoreT = 0;
+    if (scoreT == null ) {
+        scoreT = 0;
     }
-    if (gameInfo.scoreCT == null ) {
-        gameInfo.scoreCT = 0;
+    if (scoreCT == null ) {
+        scoreCT = 0;
     }
-    if (gameInfo.streakT == null ) {
-        gameInfo.streakT = 0;
+    if (streakT == null ) {
+        streakT = 0;
     }
-    if (gameInfo.streakCT == null ) {
-        gameInfo.streakCT = 0;
+    if (streakCT == null ) {
+        streakCT = 0;
     }
      
     
-    PrintToConsoleAll ( "scoreT: %d", gameInfo.scoreT );
-    PrintToConsoleAll ( "scoreCT: %d", gameInfo.scoreCT );
-    PrintToConsoleAll ( "streakT: %d", gameInfo.streakT );
-    PrintToConsoleAll ( "streakCT: %d", gameInfo.streakCT );
+    PrintToConsoleAll ( "scoreT: %d", scoreT );
+    PrintToConsoleAll ( "scoreCT: %d", scoreCT );
+    PrintToConsoleAll ( "streakT: %d", streakT );
+    PrintToConsoleAll ( "streakCT: %d", streakCT );
 
     int winTeam = GetEventInt ( event, "winner" );
     if ( winTeam == CS_TEAM_T ) {
-        gameInfo.scoreT++;
-        gameInfo.streakT++;
-        if ( gameInfo.streakCT > 0 ) {
-            gameInfo.streakCT--;
+        scoreT++;
+        streakT++;
+        if ( streakCT > 0 ) {
+            streakCT--;
         }
     } else {
-        gameInfo.scoreCT++;
-        gameInfo.streakCT++;
-        if ( gameInfo.streakT > 0 ) {
-            gameInfo.streakT--;
+        scoreCT++;
+        streakCT++;
+        if ( streakT > 0 ) {
+            streakT--;
         }
     }
     balanceTeams ( winTeam );
 }
 public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast ) {
     /* Swap score */
-    int buf = gameInfo.scoreT;
-    gameInfo.scoreCT = gameInfo.scoreT;
-    gameInfo.scoreT = buf;
+    int buf = scoreT;
+    scoreCT = scoreT;
+    scoreT = buf;
 
     /* Swap streak */
-    buf = gameInfo.streakT;
-    gameInfo.streakCT = gameInfo.streakT;
-    gameInfo.streakT = buf;
+    buf = streakT;
+    streakCT = streakT;
+    streakT = buf;
 }
 
 public void balanceTeams ( int winTeam ) {
@@ -112,29 +110,29 @@ public void balanceTeams ( int winTeam ) {
         /* Pick out best and worst players */ 
         for ( int i = 1; i <= MaxClients; i++ ) {
             if ( winTeam == GetClientTeam ( i ) ) {
-                if ( gameInfo.bestPlayer < 0 || GetClientFrags(i) > GetClientFrags(gameInfo.bestPlayer) ) {
-                    gameInfo.bestPlayer = i;
+                if ( bestPlayer < 0 || GetClientFrags(i) > GetClientFrags(bestPlayer) ) {
+                    bestPlayer = i;
                 }
             } else if ( GetClientTeam(i) >= 2 ) {
-                if ( gameInfo.worstPlayer < 0 || GetClientFrags(i) < GetClientFrags(gameInfo.worstPlayer) ) {
-                    gameInfo.worstPlayer = i;
+                if ( worstPlayer < 0 || GetClientFrags(i) < GetClientFrags(worstPlayer) ) {
+                    worstPlayer = i;
                 }
             }
         }
         /* swap best with worst */
-        if ( gameInfo.bestPlayer > 0 && gameInfo.worstPlayer > 0 ) {
-            shieldPlayer ( gameInfo.bestPlayer );
-            shieldPlayer ( gameInfo.worstPlayer );
-            movePlayerToOtherTeam ( gameInfo.bestPlayer );
-            movePlayerToOtherTeam ( gameInfo.worstPlayer );
+        if ( bestPlayer > 0 && worstPlayer > 0 ) {
+            shieldPlayer ( bestPlayer );
+            shieldPlayer ( worstPlayer );
+            movePlayerToOtherTeam ( bestPlayer );
+            movePlayerToOtherTeam ( worstPlayer );
         }
     }
 } 
 
 public bool shouldBalance ( int winTeam ) {
     return ( cvar_OSTeamBalance.BoolValue ) && ( GetClientCount(true) >= cvar_MinPlayers.IntValue ) &&
-           ( ( winTeam == CS_TEAM_T && gameInfo.streakT >= cvar_BalanceAfterStreak.IntValue ) ||
-           ( winTeam == CS_TEAM_CT && gameInfo.streakCT >= cvar_BalanceAfterStreak.IntValue ) );
+           ( ( winTeam == CS_TEAM_T && streakT >= cvar_BalanceAfterStreak.IntValue ) ||
+           ( winTeam == CS_TEAM_CT && streakCT >= cvar_BalanceAfterStreak.IntValue ) );
 }
 
 public void shieldPlayer ( int player ) {
