@@ -46,9 +46,9 @@ public void Event_GameStart ( Event event, const char[] name, bool dontBroadcast
 }
 
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
-    PrintToConsoleAll("OSTeamBalance: %i", cvar_OSTeamBalance.IntValue );
-    PrintToConsoleAll("MinPlayers: %i", cvar_MinPlayers.IntValue );
-    PrintToConsoleAll("BalanceAfterStreak: %i", cvar_BalanceAfterStreak.IntValue );
+    PrintToConsoleAll("OSTeamBalance: %d", cvar_OSTeamBalance.IntValue );
+    PrintToConsoleAll("MinPlayers: %d", cvar_MinPlayers.IntValue );
+    PrintToConsoleAll("BalanceAfterStreak: %d", cvar_BalanceAfterStreak.IntValue );
     if ( gameInfo.bestPlayer != -1 ) {
         unShieldPlayer ( gameInfo.bestPlayer );
         gameInfo.bestPlayer = -1;
@@ -59,10 +59,10 @@ public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcas
     }
 }
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
-    PrintToConsoleAll("scoreT: %i", gameInfo.scoreT );
-    PrintToConsoleAll("scoreCT: %i", gameInfo.scoreT );
-    PrintToConsoleAll("streakT: %i", gameInfo.scoreT );
-    PrintToConsoleAll("streakCT: %i", gameInfo.scoreT );
+    PrintToConsoleAll("scoreT: %d", gameInfo.scoreT );
+    PrintToConsoleAll("scoreCT: %d", gameInfo.scoreT );
+    PrintToConsoleAll("streakT: %d", gameInfo.scoreT );
+    PrintToConsoleAll("streakCT: %d", gameInfo.scoreT );
 
     int winTeam = GetEventInt ( event, "winner" );
     if ( winTeam == CS_TEAM_T ) {
