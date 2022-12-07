@@ -22,7 +22,9 @@ int streakT;
 int streakCT; 
 int bestPlayer;
 int worstPlayer;
-
+char best[64];
+char worst[64];
+    
 
 public void OnPluginStart() {
 	cvar_OSTeamBalance = CreateConVar("os_autobalance", "1", "Enable autobalance", _, true, 1.0);
@@ -35,20 +37,24 @@ public void OnPluginStart() {
     scoreCT = 0;
     streakT = 0;
     streakCT = 0;
-    bestPlayer = 0;
-    worstPlayer = 0;
+    bestPlayer = -1;
+    worstPlayer = -1;
 }
   
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
-    PrintToConsoleAll("OSTeamBalance: %d", cvar_OSTeamBalance.IntValue );
-    PrintToConsoleAll("MinPlayers: %d", cvar_MinPlayers.IntValue );
-    PrintToConsoleAll("BalanceAfterStreak: %d", cvar_BalanceAfterStreak.IntValue );
-    PrintToConsoleAll("BestPlayer: %s", bestPlayer );
-    PrintToConsoleAll("WorstPlayer: %s", worstPlayer );
+    GetClientName (bestPlayer, best, 64);
+    GetClientName (worstPlayer, worst, 64);
+    PrintToConsoleAll ( "scoreT: %d", scoreT );
+    PrintToConsoleAll ( "scoreCT: %d", scoreCT );
+    PrintToConsoleAll ( "streakT: %d", streakT );
+    PrintToConsoleAll ( "streakCT: %d", streakCT );
+    PrintToConsoleAll ( "BestPlayer: %s", best );
+    PrintToConsoleAll ( "WorstPlayer: %s",  worst );
     if ( bestPlayer != -1 ) {
         unShieldPlayer ( bestPlayer );
         bestPlayer = -1;
     }
+    
     if ( worstPlayer != -1 ) {
         unShieldPlayer ( worstPlayer );
         worstPlayer = -1;
@@ -56,10 +62,14 @@ public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcas
 }
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
     
+    GetClientName (bestPlayer, best, 64);
+    GetClientName (worstPlayer, worst, 64);
     PrintToConsoleAll ( "scoreT: %d", scoreT );
     PrintToConsoleAll ( "scoreCT: %d", scoreCT );
     PrintToConsoleAll ( "streakT: %d", streakT );
     PrintToConsoleAll ( "streakCT: %d", streakCT );
+    PrintToConsoleAll ( "BestPlayer: %s", best );
+    PrintToConsoleAll ( "WorstPlayer: %s",  worst );
 
     int winTeam = GetEventInt ( event, "winner" );
     if ( winTeam == CS_TEAM_T ) {
