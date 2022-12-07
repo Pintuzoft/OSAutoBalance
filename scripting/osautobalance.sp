@@ -27,9 +27,9 @@ enum struct GameInfo {
 GameInfo gameInfo;
 
 public void OnPluginStart() {
-	cvar_OSTeamBalance = FindConVar("mp_autoteambalance");
-	cvar_MinPlayers = CreateConVar("os_minplayers", "3", "Minimum amount of players needed to try rebalance teams", _, true, 3.0);
-	cvar_BalanceAfterStreak = CreateConVar("os_balanceafterstreak", "3", "Balance teams after X streak", _, true, 3.0);
+	cvar_OSTeamBalance = CreateConVar("os_autobalance", 1, "Enable autobalance", _, true, 1.0);
+	cvar_MinPlayers = CreateConVar("os_minplayers", 3, "Minimum amount of players needed to try rebalance teams", _, true, 10.0);
+	cvar_BalanceAfterStreak = CreateConVar("os_balanceafterstreak", 3, "Balance teams after X streak", _, true, 3.0);
 	HookEvent("game_start", Event_GameStart);
 	HookEvent("round_start", Event_RoundStart);
 	HookEvent("round_end", Event_RoundEnd);
