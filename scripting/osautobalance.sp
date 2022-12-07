@@ -44,7 +44,7 @@ public void Event_GameStart ( Event event, const char[] name, bool dontBroadcast
 }
 
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
-    PrintToConsoleAll("OSTeamBalance: %d", cvar_OSTeamBalance.IntValue );
+    PrintToConsoleAll("OSTeamBalance-: %d", cvar_OSTeamBalance.IntValue );
     PrintToConsoleAll("MinPlayers: %d", cvar_MinPlayers.IntValue );
     PrintToConsoleAll("BalanceAfterStreak: %d", cvar_BalanceAfterStreak.IntValue );
     if ( bestPlayer != -1 ) {
