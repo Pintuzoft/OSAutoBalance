@@ -73,9 +73,15 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
     balanceTeams ( winTeam );
 }
 public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast ) {
+    /* Swap score */
     int buf = gameInfo.scoreT;
     gameInfo.scoreCT = gameInfo.scoreT;
     gameInfo.scoreT = buf;
+
+    /* Swap streak */
+    buf = gameInfo.streakT;
+    gameInfo.streakCT = gameInfo.streakT;
+    gameInfo.streakT = buf;
 }
 
 public void balanceTeams ( int winTeam ) {
