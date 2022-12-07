@@ -28,13 +28,9 @@ public void OnPluginStart() {
 	cvar_OSTeamBalance = CreateConVar("os_autobalance", "1", "Enable autobalance", _, true, 1.0);
 	cvar_MinPlayers = CreateConVar("os_minplayers", "3", "Minimum amount of players needed to try rebalance teams", _, true, 10.0);
 	cvar_BalanceAfterStreak = CreateConVar("os_balanceafterstreak", "3", "Balance teams after X streak", _, true, 3.0);
-	HookEvent("game_start", Event_GameStart);
 	HookEvent("round_start", Event_RoundStart);
 	HookEvent("round_end", Event_RoundEnd);
 	HookEvent("announce_phase_end", Event_HalfTime);
-}
-
-public void Event_GameStart ( Event event, const char[] name, bool dontBroadcast ) {
     scoreT = 0;
     scoreCT = 0;
     streakT = 0;
@@ -42,11 +38,13 @@ public void Event_GameStart ( Event event, const char[] name, bool dontBroadcast
     bestPlayer = 0;
     worstPlayer = 0;
 }
-
+  
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
     PrintToConsoleAll("OSTeamBalance: %d", cvar_OSTeamBalance.IntValue );
     PrintToConsoleAll("MinPlayers: %d", cvar_MinPlayers.IntValue );
     PrintToConsoleAll("BalanceAfterStreak: %d", cvar_BalanceAfterStreak.IntValue );
+    PrintToConsoleAll("BestPlayer: %s", bestPlayer );
+    PrintToConsoleAll("WorstPlayer: %s", worstPlayer );
     if ( bestPlayer != -1 ) {
         unShieldPlayer ( bestPlayer );
         bestPlayer = -1;
@@ -80,6 +78,8 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
     balanceTeams ( winTeam );
 }
 public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast ) {
+    PrintToConsoleAll("!!HALFTIME!!");
+
     /* Swap score */
     int buf = scoreT;
     scoreCT = scoreT;
@@ -117,7 +117,7 @@ public void balanceTeams ( int winTeam ) {
 } 
 
 public bool shouldBalance ( int winTeam ) {
-    return ( cvar_OSTeamBalance.BoolValue ) && ( GetClientCount(true) >= cvar_MinPlayers.IntValue ) &&
+    return ( cvar_OSTeamBalance.IntValue == 1 ) && ( GetClientCount(true) >= cvar_MinPlayers.IntValue ) &&
            ( ( winTeam == CS_TEAM_T && streakT >= cvar_BalanceAfterStreak.IntValue ) ||
            ( winTeam == CS_TEAM_CT && streakCT >= cvar_BalanceAfterStreak.IntValue ) );
 }
