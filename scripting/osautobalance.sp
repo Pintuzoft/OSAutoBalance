@@ -25,9 +25,9 @@ int worstPlayer;
 
 
 public void OnPluginStart() {
-	cvar_OSTeamBalance = CreateConVar("os_autobalance", 1, "Enable autobalance", _, true, 1.0);
-	cvar_MinPlayers = CreateConVar("os_minplayers", 3, "Minimum amount of players needed to try rebalance teams", _, true, 10.0);
-	cvar_BalanceAfterStreak = CreateConVar("os_balanceafterstreak", 3, "Balance teams after X streak", _, true, 3.0);
+	cvar_OSTeamBalance = CreateConVar("os_autobalance", "1", "Enable autobalance", _, true, 1.0);
+	cvar_MinPlayers = CreateConVar("os_minplayers", "3", "Minimum amount of players needed to try rebalance teams", _, true, 10.0);
+	cvar_BalanceAfterStreak = CreateConVar("os_balanceafterstreak", "3", "Balance teams after X streak", _, true, 3.0);
 	HookEvent("game_start", Event_GameStart);
 	HookEvent("round_start", Event_RoundStart);
 	HookEvent("round_end", Event_RoundEnd);
@@ -44,7 +44,7 @@ public void Event_GameStart ( Event event, const char[] name, bool dontBroadcast
 }
 
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
-    PrintToConsoleAll("OSTeamBalance-: %d", cvar_OSTeamBalance.IntValue );
+    PrintToConsoleAll("OSTeamBalance: %d", cvar_OSTeamBalance.IntValue );
     PrintToConsoleAll("MinPlayers: %d", cvar_MinPlayers.IntValue );
     PrintToConsoleAll("BalanceAfterStreak: %d", cvar_BalanceAfterStreak.IntValue );
     if ( bestPlayer != -1 ) {
@@ -57,19 +57,6 @@ public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcas
     }
 }
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
-    if (scoreT == null ) {
-        scoreT = 0;
-    }
-    if (scoreCT == null ) {
-        scoreCT = 0;
-    }
-    if (streakT == null ) {
-        streakT = 0;
-    }
-    if (streakCT == null ) {
-        streakCT = 0;
-    }
-     
     
     PrintToConsoleAll ( "scoreT: %d", scoreT );
     PrintToConsoleAll ( "scoreCT: %d", scoreCT );
