@@ -42,14 +42,18 @@ public void OnPluginStart() {
 }
   
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
-    GetClientName (bestPlayer, best, 64);
-    GetClientName (worstPlayer, worst, 64);
-    PrintToConsoleAll ( "scoreT: %d", scoreT );
-    PrintToConsoleAll ( "scoreCT: %d", scoreCT );
-    PrintToConsoleAll ( "streakT: %d", streakT );
-    PrintToConsoleAll ( "streakCT: %d", streakCT );
-    PrintToConsoleAll ( "BestPlayer: %s", best );
-    PrintToConsoleAll ( "WorstPlayer: %s",  worst );
+    if ( bestPlayer > 0 ) {
+        GetClientName (bestPlayer, best, 64);
+    }
+    if ( worstPlayer > 0 ) {
+        GetClientName (worstPlayer, worst, 64);
+    }
+    PrintToChatAll ( "scoreT: %d", scoreT );
+    PrintToChatAll ( "scoreCT: %d", scoreCT );
+    PrintToChatAll ( "streakT: %d", streakT );
+    PrintToChatAll ( "streakCT: %d", streakCT );
+    PrintToChatAll ( "BestPlayer: %s", best );
+    PrintToChatAll ( "WorstPlayer: %s",  worst );
     if ( bestPlayer != -1 ) {
         unShieldPlayer ( bestPlayer );
         bestPlayer = -1;
@@ -61,15 +65,18 @@ public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcas
     }
 }
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
-    
-    GetClientName (bestPlayer, best, 64);
-    GetClientName (worstPlayer, worst, 64);
-    PrintToConsoleAll ( "scoreT: %d", scoreT );
-    PrintToConsoleAll ( "scoreCT: %d", scoreCT );
-    PrintToConsoleAll ( "streakT: %d", streakT );
-    PrintToConsoleAll ( "streakCT: %d", streakCT );
-    PrintToConsoleAll ( "BestPlayer: %s", best );
-    PrintToConsoleAll ( "WorstPlayer: %s",  worst );
+    if ( bestPlayer > 0 ) {
+        GetClientName (bestPlayer, best, 64);
+    }
+    if ( worstPlayer > 0 ) {
+        GetClientName (worstPlayer, worst, 64);
+    }
+    PrintToChatAll ( "scoreT: %d", scoreT );
+    PrintToChatAll ( "scoreCT: %d", scoreCT );
+    PrintToChatAll ( "streakT: %d", streakT );
+    PrintToChatAll ( "streakCT: %d", streakCT );
+    PrintToChatAll ( "BestPlayer: %s", best );
+    PrintToChatAll ( "WorstPlayer: %s",  worst );
 
     int winTeam = GetEventInt ( event, "winner" );
     if ( winTeam == CS_TEAM_T ) {
@@ -88,7 +95,7 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
     balanceTeams ( winTeam );
 }
 public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast ) {
-    PrintToConsoleAll("!!HALFTIME!!");
+    PrintToChatAll("!!HALFTIME!!");
 
     /* Swap score */
     int buf = scoreT;
