@@ -65,6 +65,9 @@ public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcas
     }
 }
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
+    if (IsWarmupActive()) {
+        return;
+    }
     if ( bestPlayer > 0 ) {
         GetClientName (bestPlayer, best, 64);
     }
@@ -166,4 +169,8 @@ public void movePlayerToOtherTeam ( int player ) {
 
 public int getOtherTeamID ( int player ) {
     return ( GetClientTeam(player) == 2 ? 3 : 2 );
+}
+
+bool IsWarmupActive() {
+	return view_as<bool>(GameRules_GetProp("m_bWarmupPeriod"));
 }
