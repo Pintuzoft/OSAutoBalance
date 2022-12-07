@@ -59,10 +59,24 @@ public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcas
     }
 }
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
-    PrintToConsoleAll("scoreT: %d", gameInfo.scoreT );
-    PrintToConsoleAll("scoreCT: %d", gameInfo.scoreT );
-    PrintToConsoleAll("streakT: %d", gameInfo.scoreT );
-    PrintToConsoleAll("streakCT: %d", gameInfo.scoreT );
+    if (gameInfo.scoreT == null ) {
+        gameInfo.scoreT = 0;
+    }
+    if (gameInfo.scoreCT == null ) {
+        gameInfo.scoreCT = 0;
+    }
+    if (gameInfo.streakT == null ) {
+        gameInfo.streakT = 0;
+    }
+    if (gameInfo.streakCT == null ) {
+        gameInfo.streakCT = 0;
+    }
+     
+    
+    PrintToConsoleAll ( "scoreT: %d", gameInfo.scoreT );
+    PrintToConsoleAll ( "scoreCT: %d", gameInfo.scoreCT );
+    PrintToConsoleAll ( "streakT: %d", gameInfo.streakT );
+    PrintToConsoleAll ( "streakCT: %d", gameInfo.streakCT );
 
     int winTeam = GetEventInt ( event, "winner" );
     if ( winTeam == CS_TEAM_T ) {
