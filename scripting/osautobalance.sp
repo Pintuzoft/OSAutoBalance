@@ -106,12 +106,12 @@ public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast 
     PrintToChatAll("!!HALFTIME!!");
 
     /* Swap score */
-    int buf = scoreT;
+    int buf = scoreCT;
     scoreCT = scoreT;
     scoreT = buf;
 
     /* Swap streak */
-    buf = streakT;
+    buf = streakCT;
     streakCT = streakT;
     streakT = buf;
 }
@@ -122,7 +122,7 @@ public void balanceTeams ( int winTeam ) {
     if ( shouldBalance ( winTeam ) ) {
     PrintToConsoleAll("balanceTeams:1;");
         /* Pick out best and worst players */ 
-        for ( int i = 1; i < MaxClients; i++ ) {
+        for ( int i = 0; i <= MaxClients; i++ ) {
     PrintToConsoleAll("----------------");
 
     PrintToConsoleAll("balanceTeams:2;");
@@ -132,29 +132,26 @@ public void balanceTeams ( int winTeam ) {
     PrintToConsoleAll("balanceTeams:4;");
                     bestPlayer = i;
                 }
-    PrintToConsoleAll("balanceTeams:5;");
             } else if ( GetClientTeam(i) >= 2 ) {
-    PrintToConsoleAll("balanceTeams:6;");
+    PrintToConsoleAll("balanceTeams:5;");
                 if ( worstPlayer < 0 || GetClientFrags(i) < GetClientFrags(worstPlayer) ) {
-    PrintToConsoleAll("balanceTeams:7;");
+    PrintToConsoleAll("balanceTeams:6;");
                     worstPlayer = i;
                 }
-    PrintToConsoleAll("balanceTeams:8;");
             }
-    PrintToConsoleAll("balanceTeams:9;");
         }
-    PrintToConsoleAll("balanceTeams:10;");
+    PrintToConsoleAll("balanceTeams:7;");
         /* swap best with worst */
         if ( bestPlayer > 0 && worstPlayer > 0 ) {
-    PrintToConsoleAll("balanceTeams:11;");
+    PrintToConsoleAll("balanceTeams:8;");
             shieldPlayer ( bestPlayer );
             shieldPlayer ( worstPlayer );
             movePlayerToOtherTeam ( bestPlayer );
             movePlayerToOtherTeam ( worstPlayer );
         }
-    PrintToConsoleAll("balanceTeams:12;");
+    PrintToConsoleAll("balanceTeams:9;");
     }
-    PrintToConsoleAll("balanceTeams:13;");
+    PrintToConsoleAll("balanceTeams:10;");
 } 
 
 public bool shouldBalance ( int winTeam ) {
