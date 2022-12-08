@@ -33,6 +33,10 @@ public void OnPluginStart() {
 	HookEvent("round_start", Event_RoundStart);
 	HookEvent("round_end", Event_RoundEnd);
 	HookEvent("announce_phase_end", Event_HalfTime);
+    zerofy ( );
+}
+
+public void zerofy ( ) {
     scoreT = 0;
     scoreCT = 0;
     streakT = 0;
@@ -40,7 +44,7 @@ public void OnPluginStart() {
     bestPlayer = -1;
     worstPlayer = -1;
 }
-  
+
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
     if ( bestPlayer > 0 ) {
         GetClientName (bestPlayer, best, 64);
@@ -66,6 +70,7 @@ public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcas
 }
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
     if (IsWarmupActive()) {
+        zerofy();
         return;
     }
     if ( bestPlayer > 0 ) {
@@ -112,28 +117,42 @@ public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast 
 }
 
 public void balanceTeams ( int winTeam ) {
+    PrintToChatAll("balanceTeams:0;");
     /* check if we should balance players */
     if ( shouldBalance ( winTeam ) ) {
+    PrintToChatAll("balanceTeams:1;");
         /* Pick out best and worst players */ 
         for ( int i = 1; i <= MaxClients; i++ ) {
+    PrintToChatAll("balanceTeams:2;");
             if ( winTeam == GetClientTeam ( i ) ) {
+    PrintToChatAll("balanceTeams:3;");
                 if ( bestPlayer < 0 || GetClientFrags(i) > GetClientFrags(bestPlayer) ) {
+    PrintToChatAll("balanceTeams:4;");
                     bestPlayer = i;
                 }
+    PrintToChatAll("balanceTeams:5;");
             } else if ( GetClientTeam(i) >= 2 ) {
+    PrintToChatAll("balanceTeams:6;");
                 if ( worstPlayer < 0 || GetClientFrags(i) < GetClientFrags(worstPlayer) ) {
+    PrintToChatAll("balanceTeams:7;");
                     worstPlayer = i;
                 }
+    PrintToChatAll("balanceTeams:8;");
             }
+    PrintToChatAll("balanceTeams:9;");
         }
+    PrintToChatAll("balanceTeams:10;");
         /* swap best with worst */
         if ( bestPlayer > 0 && worstPlayer > 0 ) {
+    PrintToChatAll("balanceTeams:11;");
             shieldPlayer ( bestPlayer );
             shieldPlayer ( worstPlayer );
             movePlayerToOtherTeam ( bestPlayer );
             movePlayerToOtherTeam ( worstPlayer );
         }
+    PrintToChatAll("balanceTeams:12;");
     }
+    PrintToChatAll("balanceTeams:13;");
 } 
 
 public bool shouldBalance ( int winTeam ) {
