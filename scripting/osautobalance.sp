@@ -43,6 +43,8 @@ public void zerofy ( ) {
     streakCT = 0;
     bestPlayer = -1;
     worstPlayer = -1;
+    best = "-";
+    worst = "-";
 }
 
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
@@ -117,45 +119,32 @@ public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast 
 }
 
 public void balanceTeams ( int winTeam ) {
-    PrintToConsoleAll("balanceTeams:0;");
     /* check if we should balance players */
     if ( shouldBalance ( winTeam ) ) {
-    PrintToConsoleAll("balanceTeams:1;");
         /* Pick out best and worst players */ 
         for ( int i = 1; i <= MaxClients; i++ ) {
     PrintToConsoleAll("-----------");
-    PrintToConsoleAll("balanceTeams:2;");
 
             if ( IsClientInGame ( i ) ) {
-    PrintToConsoleAll("balanceTeams:3;");
                 if ( winTeam == GetClientTeam ( i ) ) {
-    PrintToConsoleAll("balanceTeams:4;");
                     if ( bestPlayer < 0 || GetClientFrags(i) > GetClientFrags(bestPlayer) ) {
-    PrintToConsoleAll("balanceTeams:5;");
                         bestPlayer = i;
                     }
                 } else if ( GetClientTeam(i) >= 2 ) {
-    PrintToConsoleAll("balanceTeams:6;");
                     if ( worstPlayer < 0 || GetClientFrags(i) < GetClientFrags(worstPlayer) ) {
-    PrintToConsoleAll("balanceTeams:7;");
                         worstPlayer = i;
                     }
                 }
             }
-    PrintToConsoleAll("balanceTeams:8;");
         }
-    PrintToConsoleAll("balanceTeams:9;");
         /* swap best with worst */
         if ( bestPlayer > 0 && worstPlayer > 0 ) {
-    PrintToConsoleAll("balanceTeams:10;");
             shieldPlayer ( bestPlayer );
             shieldPlayer ( worstPlayer );
             movePlayerToOtherTeam ( bestPlayer );
             movePlayerToOtherTeam ( worstPlayer );
         }
-    PrintToConsoleAll("balanceTeams:11;");
     }
-    PrintToConsoleAll("balanceTeams:10;");
 } 
 
 public bool shouldBalance ( int winTeam ) {
