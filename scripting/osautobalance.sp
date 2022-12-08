@@ -122,7 +122,7 @@ public void balanceTeams ( int winTeam ) {
     if ( shouldBalance ( winTeam ) ) {
     PrintToConsoleAll("balanceTeams:1;");
         /* Pick out best and worst players */ 
-        for ( int i = 0; i <= MaxClients; i++ ) {
+        for ( int i = 1; i <= MaxClients; i++ ) {
     PrintToConsoleAll("----------------");
 
     PrintToConsoleAll("balanceTeams:2;");
