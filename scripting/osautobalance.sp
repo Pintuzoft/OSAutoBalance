@@ -48,6 +48,7 @@ public void zerofy ( ) {
     bestPlayer = -1;
     worstPlayer = -1;
     best = "-";
+    second = "-";
     worst = "-";
 }
 
@@ -91,16 +92,22 @@ public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast 
 
 public void balanceTeams ( int winTeam ) {
     /* check if we should balance players */
+    PrintToConsoleAll ( "0:" );
     if ( shouldBalance ( winTeam ) ) {
+    PrintToConsoleAll ( "1:" );
         
         /* loop all users to find target players */
         findTargetPlayers ( winTeam );
+    PrintToConsoleAll ( "2:" );
         
         /* swap the target players if we found them */
         if ( bestPlayer > 0 && secondPlayer > 0 && worstPlayer > 0 ) {
+    PrintToConsoleAll ( "3:" );
             swapTargetPlayers ( );
         }
+    PrintToConsoleAll ( "4:" );
     }
+    PrintToConsoleAll ( "5:" );
 } 
 
 public findTargetPlayers ( int winTeam ) {
