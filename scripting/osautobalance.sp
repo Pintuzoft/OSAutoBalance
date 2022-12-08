@@ -21,19 +21,23 @@ int playersCT;
 int streakT;
 int streakCT; 
 int bestPlayer;
+int secondPlayer;
 int worstPlayer;
+int immuneBest;
+int immuneWorst;
 char best[64];
+char second[64];
 char worst[64];
-    
+bool swapFirst;
 
-public void OnPluginStart() {
-	cvar_OSTeamBalance = CreateConVar("os_autobalance", "1", "Enable autobalance", _, true, 1.0);
-	cvar_MinPlayers = CreateConVar("os_minplayers", "3", "Minimum amount of players needed to try rebalance teams", _, true, 10.0);
-	cvar_BalanceAfterStreak = CreateConVar("os_balanceafterstreak", "3", "Balance teams after X streak", _, true, 3.0);
-	HookEvent("round_start", Event_RoundStart);
-	HookEvent("round_end", Event_RoundEnd);
-	HookEvent("announce_phase_end", Event_HalfTime);
-    zerofy ( );
+public void OnPluginStart ( ) {
+    cvar_OSTeamBalance = CreateConVar ( "os_autobalance", "1", "Enable autobalance", _, true, 1.0 );
+    cvar_MinPlayers = CreateConVar ( "os_minplayers", "3", "Minimum amount of players needed to try rebalance teams", _, true, 10.0 );
+    cvar_BalanceAfterStreak = CreateConVar ( "os_balanceafterstreak", "3", "Balance teams after X streak", _, true, 10.0 );
+    HookEvent ( "round_start", Event_RoundStart );
+    HookEvent ( "round_end", Event_RoundEnd );
+    HookEvent ( "announce_phase_end", Event_HalfTime );
+    AutoExecConfig ( true, "osautobalance" );
 }
 
 public void zerofy ( ) {
@@ -48,46 +52,17 @@ public void zerofy ( ) {
 }
 
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
-    if ( bestPlayer > 0 ) {
-        GetClientName (bestPlayer, best, 64);
-    }
-    if ( worstPlayer > 0 ) {
-        GetClientName (worstPlayer, worst, 64);
-    }
-    PrintToChatAll ( "scoreT: %d", scoreT );
-    PrintToChatAll ( "scoreCT: %d", scoreCT );
-    PrintToChatAll ( "streakT: %d", streakT );
-    PrintToChatAll ( "streakCT: %d", streakCT );
-    PrintToChatAll ( "BestPlayer: %s", best );
-    PrintToChatAll ( "WorstPlayer: %s",  worst );
-    if ( bestPlayer != -1 ) {
-        unShieldPlayer ( bestPlayer );
-        bestPlayer = -1;
-    }
-    
-    if ( worstPlayer != -1 ) {
-        unShieldPlayer ( worstPlayer );
-        worstPlayer = -1;
-    }
+    fixPlayerNames ( );
+    printDebug ( );
+    unShieldPlayers ( );
 }
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
     if (IsWarmupActive()) {
         zerofy();
         return;
     }
-    if ( bestPlayer > 0 ) {
-        GetClientName (bestPlayer, best, 64);
-    }
-    if ( worstPlayer > 0 ) {
-        GetClientName (worstPlayer, worst, 64);
-    }
-    PrintToChatAll ( "scoreT: %d", scoreT );
-    PrintToChatAll ( "scoreCT: %d", scoreCT );
-    PrintToChatAll ( "streakT: %d", streakT );
-    PrintToChatAll ( "streakCT: %d", streakCT );
-    PrintToChatAll ( "BestPlayer: %s", best );
-    PrintToChatAll ( "WorstPlayer: %s",  worst );
-
+    fixPlayerNames ( );
+    printDebug ( );
     int winTeam = GetEventInt ( event, "winner" );
     if ( winTeam == CS_TEAM_T ) {
         scoreT++;
@@ -104,15 +79,11 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
     }
     balanceTeams ( winTeam );
 }
+/* Halftime, lets swap score & streak */
 public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast ) {
-    PrintToChatAll("!!HALFTIME!!");
-
-    /* Swap score */
     int buf = scoreCT;
     scoreCT = scoreT;
     scoreT = buf;
-
-    /* Swap streak */
     buf = streakCT;
     streakCT = streakT;
     streakT = buf;
@@ -121,31 +92,53 @@ public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast 
 public void balanceTeams ( int winTeam ) {
     /* check if we should balance players */
     if ( shouldBalance ( winTeam ) ) {
-        /* Pick out best and worst players */ 
-        for ( int i = 1; i <= MaxClients; i++ ) {
-    PrintToConsoleAll("-----------");
-
-            if ( IsClientInGame ( i ) ) {
-                if ( winTeam == GetClientTeam ( i ) ) {
-                    if ( bestPlayer < 0 || GetClientFrags(i) > GetClientFrags(bestPlayer) ) {
-                        bestPlayer = i;
-                    }
-                } else if ( GetClientTeam(i) >= 2 ) {
-                    if ( worstPlayer < 0 || GetClientFrags(i) < GetClientFrags(worstPlayer) ) {
-                        worstPlayer = i;
-                    }
-                }
-            }
-        }
-        /* swap best with worst */
-        if ( bestPlayer > 0 && worstPlayer > 0 ) {
-            shieldPlayer ( bestPlayer );
-            shieldPlayer ( worstPlayer );
-            movePlayerToOtherTeam ( bestPlayer );
-            movePlayerToOtherTeam ( worstPlayer );
+        
+        /* loop all users to find target players */
+        findTargetPlayers ( winTeam );
+        
+        /* swap the target players if we found them */
+        if ( bestPlayer > 0 && secondPlayer > 0 && worstPlayer > 0 ) {
+            swapTargetPlayers ( );
         }
     }
 } 
+
+public findTargetPlayers ( int winTeam ) {
+    /* Pick out best and worst players */ 
+    for ( int i = 1; i <= MaxClients; i++ ) {
+        if ( i == immuneBest || i == immuneWorst ) {
+        /* skip a user that was recently swapped */
+        } else if ( IsClientInGame ( i ) ) {
+            if ( winTeam == GetClientTeam ( i ) ) {
+                if ( bestPlayer < 0 || GetClientFrags(i) > GetClientFrags(bestPlayer) ) {
+                    secondPlayer = bestPlayer;
+                    bestPlayer = i;
+                }
+            } else if ( GetClientTeam(i) >= 2 ) {
+                if ( worstPlayer < 0 || GetClientFrags(i) < GetClientFrags(worstPlayer) ) {
+                    worstPlayer = i;
+                }
+            }
+        }
+    }
+}
+
+public swapTargetPlayers ( ) {
+    /* swap best or second with worst */
+    swapFirst = GetRandomInt(0,1) == 1 ? true : false;
+    if ( swapFirst ) {
+        shieldPlayer ( bestPlayer );
+        PrintToChatAll ( "\x07[OSAutoBalance]: %s swapped!", best );
+        movePlayerToOtherTeam ( bestPlayer );
+    } else {
+        shieldPlayer ( secondPlayer );
+        PrintToChatAll ( "\x07[OSAutoBalance]: %s swapped!", second );
+        movePlayerToOtherTeam ( secondPlayer );
+    }
+    shieldPlayer ( worstPlayer );
+    PrintToChatAll ( "\x07[OSAutoBalance]: %s swapped!", worst );
+    movePlayerToOtherTeam ( worstPlayer );
+}
 
 public bool shouldBalance ( int winTeam ) {
     return ( cvar_OSTeamBalance.IntValue == 1 ) && ( GetClientCount(true) >= cvar_MinPlayers.IntValue ) &&
@@ -153,6 +146,7 @@ public bool shouldBalance ( int winTeam ) {
            ( winTeam == CS_TEAM_CT && streakCT >= cvar_BalanceAfterStreak.IntValue ) );
 }
 
+/* shield on */
 public void shieldPlayer ( int player ) {
     if ( IsPlayerAlive ( player ) && ! IsClientSourceTV ( player ) ) {
         /* Shield here */ 
@@ -160,6 +154,8 @@ public void shieldPlayer ( int player ) {
         SetEntProp(player, Prop_Data, "m_takedamage", 0, 1);
     }
 }
+
+/* shield off */
 public void unShieldPlayer ( int player ) {
     if ( IsClientInGame ( player ) && ! IsClientSourceTV ( player ) ) {
         /* unshield here */
@@ -178,10 +174,57 @@ public void movePlayerToOtherTeam ( int player ) {
     }
 }
 
+
+/* Random methods */
+
+/* return players enemy team */ 
 public int getOtherTeamID ( int player ) {
     return ( GetClientTeam(player) == 2 ? 3 : 2 );
 }
 
+/* store player names */
+public void fixPlayerNames ( ) {
+    if ( bestPlayer > 0 ) {
+        GetClientName (bestPlayer, best, 64);
+    }
+    if ( secondPlayer > 0 ) {
+        GetClientName (secondPlayer, second, 64);
+    }
+    if ( worstPlayer > 0 ) {
+        GetClientName (worstPlayer, worst, 64);
+    }
+}
+
+/* unshielding all players */
+public void unShieldPlayers ( ) {
+    if ( bestPlayer != -1 ) {
+        unShieldPlayer ( bestPlayer );
+        bestPlayer = -1;
+    }
+    
+    if ( secondPlayer != -1 ) {
+        unShieldPlayer ( secondPlayer );
+        secondPlayer = -1;
+    }
+    
+    if ( worstPlayer != -1 ) {
+        unShieldPlayer ( worstPlayer );
+        worstPlayer = -1;
+    }
+}
+
+/* print debug information */
+public void printDebug ( ) {
+    PrintToChatAll ( "scoreT: %d", scoreT );
+    PrintToChatAll ( "scoreCT: %d", scoreCT );
+    PrintToChatAll ( "streakT: %d", streakT );
+    PrintToChatAll ( "streakCT: %d", streakCT );
+    PrintToChatAll ( "best: %s", best );
+    PrintToChatAll ( "second: %s", second );
+    PrintToChatAll ( "worst: %s",  worst );
+}
+
+/* determine if its a warmup round */
 bool IsWarmupActive() {
 	return view_as<bool>(GameRules_GetProp("m_bWarmupPeriod"));
 }
