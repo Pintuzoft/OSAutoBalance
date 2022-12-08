@@ -123,33 +123,37 @@ public void balanceTeams ( int winTeam ) {
     PrintToConsoleAll("balanceTeams:1;");
         /* Pick out best and worst players */ 
         for ( int i = 1; i <= MaxClients; i++ ) {
-    PrintToConsoleAll("----------------");
-
+    PrintToConsoleAll("-----------");
     PrintToConsoleAll("balanceTeams:2;");
-            if ( winTeam == GetClientTeam ( i ) ) {
+
+            if ( IsClientInGame ( i ) ) {
     PrintToConsoleAll("balanceTeams:3;");
-                if ( bestPlayer < 0 || GetClientFrags(i) > GetClientFrags(bestPlayer) ) {
+                if ( winTeam == GetClientTeam ( i ) ) {
     PrintToConsoleAll("balanceTeams:4;");
-                    bestPlayer = i;
-                }
-            } else if ( GetClientTeam(i) >= 2 ) {
+                    if ( bestPlayer < 0 || GetClientFrags(i) > GetClientFrags(bestPlayer) ) {
     PrintToConsoleAll("balanceTeams:5;");
-                if ( worstPlayer < 0 || GetClientFrags(i) < GetClientFrags(worstPlayer) ) {
+                        bestPlayer = i;
+                    }
+                } else if ( GetClientTeam(i) >= 2 ) {
     PrintToConsoleAll("balanceTeams:6;");
-                    worstPlayer = i;
+                    if ( worstPlayer < 0 || GetClientFrags(i) < GetClientFrags(worstPlayer) ) {
+    PrintToConsoleAll("balanceTeams:7;");
+                        worstPlayer = i;
+                    }
                 }
             }
+    PrintToConsoleAll("balanceTeams:8;");
         }
-    PrintToConsoleAll("balanceTeams:7;");
+    PrintToConsoleAll("balanceTeams:9;");
         /* swap best with worst */
         if ( bestPlayer > 0 && worstPlayer > 0 ) {
-    PrintToConsoleAll("balanceTeams:8;");
+    PrintToConsoleAll("balanceTeams:10;");
             shieldPlayer ( bestPlayer );
             shieldPlayer ( worstPlayer );
             movePlayerToOtherTeam ( bestPlayer );
             movePlayerToOtherTeam ( worstPlayer );
         }
-    PrintToConsoleAll("balanceTeams:9;");
+    PrintToConsoleAll("balanceTeams:11;");
     }
     PrintToConsoleAll("balanceTeams:10;");
 } 
