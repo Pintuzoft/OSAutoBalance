@@ -117,42 +117,44 @@ public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast 
 }
 
 public void balanceTeams ( int winTeam ) {
-    PrintToChatAll("balanceTeams:0;");
+    PrintToConsoleAll("balanceTeams:0;");
     /* check if we should balance players */
     if ( shouldBalance ( winTeam ) ) {
-    PrintToChatAll("balanceTeams:1;");
+    PrintToConsoleAll("balanceTeams:1;");
         /* Pick out best and worst players */ 
         for ( int i = 1; i <= MaxClients; i++ ) {
-    PrintToChatAll("balanceTeams:2;");
+    PrintToConsoleAll("----------------");
+
+    PrintToConsoleAll("balanceTeams:2;");
             if ( winTeam == GetClientTeam ( i ) ) {
-    PrintToChatAll("balanceTeams:3;");
+    PrintToConsoleAll("balanceTeams:3;");
                 if ( bestPlayer < 0 || GetClientFrags(i) > GetClientFrags(bestPlayer) ) {
-    PrintToChatAll("balanceTeams:4;");
+    PrintToConsoleAll("balanceTeams:4;");
                     bestPlayer = i;
                 }
-    PrintToChatAll("balanceTeams:5;");
+    PrintToConsoleAll("balanceTeams:5;");
             } else if ( GetClientTeam(i) >= 2 ) {
-    PrintToChatAll("balanceTeams:6;");
+    PrintToConsoleAll("balanceTeams:6;");
                 if ( worstPlayer < 0 || GetClientFrags(i) < GetClientFrags(worstPlayer) ) {
-    PrintToChatAll("balanceTeams:7;");
+    PrintToConsoleAll("balanceTeams:7;");
                     worstPlayer = i;
                 }
-    PrintToChatAll("balanceTeams:8;");
+    PrintToConsoleAll("balanceTeams:8;");
             }
-    PrintToChatAll("balanceTeams:9;");
+    PrintToConsoleAll("balanceTeams:9;");
         }
-    PrintToChatAll("balanceTeams:10;");
+    PrintToConsoleAll("balanceTeams:10;");
         /* swap best with worst */
         if ( bestPlayer > 0 && worstPlayer > 0 ) {
-    PrintToChatAll("balanceTeams:11;");
+    PrintToConsoleAll("balanceTeams:11;");
             shieldPlayer ( bestPlayer );
             shieldPlayer ( worstPlayer );
             movePlayerToOtherTeam ( bestPlayer );
             movePlayerToOtherTeam ( worstPlayer );
         }
-    PrintToChatAll("balanceTeams:12;");
+    PrintToConsoleAll("balanceTeams:12;");
     }
-    PrintToChatAll("balanceTeams:13;");
+    PrintToConsoleAll("balanceTeams:13;");
 } 
 
 public bool shouldBalance ( int winTeam ) {
