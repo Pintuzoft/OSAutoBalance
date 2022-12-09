@@ -42,7 +42,6 @@ public void OnPluginStart ( ) {
 
 /*** EVENTS ***/
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
-    fixPlayerNames ( );
     printDebug ( );
     unShieldAllPlayers ( );
 }
@@ -51,7 +50,6 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
         zerofy();
         return;
     }
-    fixPlayerNames ( );
     printDebug ( );
     int winTeam = GetEventInt ( event, "winner" );
     analyzeStatistics ( winTeam );
@@ -167,6 +165,7 @@ public findTargetPlayers ( int winTeam ) {
 
 /* swap the players we found */
 public swapTargetPlayers ( ) {
+    fixPlayerNames ( );
     /* swap best or second with worst */
     swapFirst = GetRandomInt(0,1) == 1 ? true : false;
     if ( swapFirst ) {
