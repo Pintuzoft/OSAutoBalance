@@ -6,14 +6,6 @@ ConVar cvar_OSTeamBalance;
 ConVar cvar_MinPlayers;
 ConVar cvar_BalanceAfterStreak;
 
-public Plugin myinfo = {
-	name = "OSAutoBalance",
-	author = "Pintuz",
-	description = "OldSwedes Auto-Balance plugin",
-	version = "0.01",
-	url = "https://github.com/Pintuzoft/OSAutoBalance"
-}
-
 int scoreT;
 int scoreCT;
 int playersT;
@@ -30,6 +22,14 @@ char second[64];
 char worst[64];
 bool swapFirst;
 
+public Plugin myinfo = {
+	name = "OSAutoBalance",
+	author = "Pintuz",
+	description = "OldSwedes Auto-Balance plugin",
+	version = "0.01",
+	url = "https://github.com/Pintuzoft/OSAutoBalance"
+}
+
 public void OnPluginStart ( ) {
     cvar_OSTeamBalance = CreateConVar ( "os_autobalance", "1", "Enable autobalance", _, true, 1.0 );
     cvar_MinPlayers = CreateConVar ( "os_minplayers", "6", "Minimum amount of players needed to try rebalance teams", _, true, 6.0 );
@@ -40,21 +40,7 @@ public void OnPluginStart ( ) {
     AutoExecConfig ( true, "osautobalance" );
 }
 
-public void zerofy ( ) {
-    scoreT = 0;
-    scoreCT = 0;
-    streakT = 0;
-    streakCT = 0;
-
-}
-public void zerofyPlayers ( ) {
-    bestPlayer = -1;
-    secondPlayer = -1;
-    worstPlayer = -1;
-    best = "-";
-    second = "-";
-    worst = "-";
-}
+/*** EVENTS ***/
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
     fixPlayerNames ( );
     printDebug ( );
@@ -68,19 +54,7 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
     fixPlayerNames ( );
     printDebug ( );
     int winTeam = GetEventInt ( event, "winner" );
-    if ( winTeam == CS_TEAM_T ) {
-        scoreT++;
-        streakT++;
-        if ( streakCT > 0 ) {
-            streakCT--;
-        }
-    } else {
-        scoreCT++;
-        streakCT++;
-        if ( streakT > 0 ) {
-            streakT--;
-        }
-    }
+    analyzeStatistics ( winTeam );
     balanceTeams ( winTeam );
 }
 /* Halftime, lets swap score & streak */
@@ -92,7 +66,30 @@ public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast 
     streakCT = streakT;
     streakT = buf;
 }
+/*** END EVENTS ***/
 
+
+/* analyze statistical information */
+public void analyzeStatistics ( int winTeam ) {
+    switch ( winTeam ) {
+        case CS_TEAM_T: {
+            ++scoreT;
+            ++streakT;
+            if ( streakCT > 0 ) {
+                --streakCT;
+            }
+        }
+        case CS_TEAM_CT: {
+            ++scoreCT;
+            ++streakCT;
+            if ( streakT > 0 ) {
+                --streakT;
+            }
+        }
+    }
+}
+
+/* balance teams  */
 public void balanceTeams ( int winTeam ) {
     /* check if we should balance players */
     if ( shouldBalance ( winTeam ) ) {
@@ -105,40 +102,121 @@ public void balanceTeams ( int winTeam ) {
             shieldAllPlayers ( );
             swapTargetPlayers ( );
         }
+    } else {
+        /* If T is larger than CT move a T over */
+        makeSureThereIsMoreCT ( );
     }
 } 
 
+/* make sure CT is the bigger team if its not */
+public void makeSureThereIsMoreCT ( ) {
+    int playerT = 999;
+    for ( int i = 1; i <= MaxClients; i++ ) {
+        if ( IsClientInGame ( i ) && ! IsClientSourceTV ( i ) ) {
+            switch ( GetClientTeam(i) ) {
+                case CS_TEAM_T: {
+                    ++playersT;
+                    if ( GetClientFrags(i) < GetClientFrags(playerT) ) {
+                        playerT = i;
+                    }
+                }
+                case CS_TEAM_CT: {
+                    ++playersCT;
+                }
+            }
+        }
+    }
+    if ( playersT > playersCT && playerT < 999 ) {
+        shieldAllPlayers ( );
+        movePlayerToOtherTeam ( playerT );
+    }
+}
+
+/* find the target users */
 public findTargetPlayers ( int winTeam ) {
     zerofyPlayers ( );
     /* Pick out best and worst players */ 
     for ( int i = 1; i <= MaxClients; i++ ) {
-       
-        if ( i == immuneBest || i == immuneWorst ) {
-        /* skip a user that was recently swapped */
-        } else if ( IsClientInGame ( i ) && ! IsClientSourceTV ( i ) ) {
-            if ( winTeam == GetClientTeam ( i ) ) {
-                if ( bestPlayer < 0 ) {
-                    bestPlayer = i;
-                } else if ( GetClientFrags(i) > GetClientFrags(bestPlayer) ) {
-                    secondPlayer = bestPlayer;
-                    bestPlayer = i;
-                } else if ( secondPlayer < 0 ) {
-                    secondPlayer = i;
-                } else if ( GetClientFrags(i) > GetClientFrags(secondPlayer) ) {
-                    secondPlayer = i;
-                }
+        if ( IsClientInGame ( i ) && ! IsClientSourceTV ( i ) ) {
+            if ( i == immuneBest || i == immuneWorst ) {
+            /* skip a user that was recently swapped */
+            } else  {
+                if ( winTeam == GetClientTeam ( i ) ) {
+                    if ( bestPlayer < 0 ) {
+                        bestPlayer = i;
+                    } else if ( GetClientFrags(i) > GetClientFrags(bestPlayer) ) {
+                        secondPlayer = bestPlayer;
+                        bestPlayer = i;
+                    } else if ( secondPlayer < 0 ) {
+                        secondPlayer = i;
+                    } else if ( GetClientFrags(i) > GetClientFrags(secondPlayer) ) {
+                        secondPlayer = i;
+                    }
 
-            } else if ( GetClientTeam(i) >= 2 ) {
-                if ( worstPlayer < 0 ) {
-                    worstPlayer = i;
-                } else if ( GetClientFrags(i) < GetClientFrags(worstPlayer) ) {
-                    worstPlayer = i;
+                } else if ( GetClientTeam(i) >= 2 ) {
+                    if ( worstPlayer < 0 ) {
+                        worstPlayer = i;
+                    } else if ( GetClientFrags(i) < GetClientFrags(worstPlayer) ) {
+                        worstPlayer = i;
+                    }
                 }
-
             }
         }
     }
 }
+
+/* swap the players we found */
+public swapTargetPlayers ( ) {
+    /* swap best or second with worst */
+    swapFirst = GetRandomInt(0,1) == 1 ? true : false;
+    if ( swapFirst ) {
+        PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped!", best );
+        movePlayerToOtherTeam ( bestPlayer );
+        immuneBest = bestPlayer;
+    } else {
+        PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped!", second );
+        movePlayerToOtherTeam ( secondPlayer );
+        immuneBest = bestPlayer;
+    }
+    PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped!", worst );
+    movePlayerToOtherTeam ( worstPlayer );
+    immuneBest = worstPlayer;
+
+    /* reset streak */
+    streakT = 0;
+    streakCT = 0;
+}
+
+
+/*** STATIC ***/
+
+/* reset score and streak information */
+public void zerofy ( ) {
+    scoreT = 0;
+    scoreCT = 0;
+    streakT = 0;
+    streakCT = 0;
+}
+
+/* reset player information */
+public void zerofyPlayers ( ) {
+    bestPlayer = -1;
+    secondPlayer = -1;
+    worstPlayer = -1;
+    best = "-";
+    second = "-";
+    worst = "-";
+    playersT = 0;
+    playersCT = 0;
+}
+
+public bool shouldBalance ( int winTeam ) {
+    return ( cvar_OSTeamBalance.IntValue == 1 ) && ( GetClientCount(true) >= cvar_MinPlayers.IntValue ) &&
+           ( ( winTeam == CS_TEAM_T && streakT >= cvar_BalanceAfterStreak.IntValue ) ||
+           ( winTeam == CS_TEAM_CT && streakCT >= cvar_BalanceAfterStreak.IntValue ) );
+}
+
+/* shield all players */
 public void shieldAllPlayers ( ) {
     for ( int i = 1; i <= MaxClients; i++ ) {
         if ( IsClientInGame ( i ) && IsPlayerAlive ( i ) && ! IsClientSourceTV ( i ) ) {
@@ -146,31 +224,14 @@ public void shieldAllPlayers ( ) {
         }
     }
 }
+
+/* unshield all players */
 public void unShieldAllPlayers ( ) {
     for ( int i = 1; i <= MaxClients; i++ ) {
         if ( IsClientInGame ( i ) && IsPlayerAlive(i) && ! IsClientSourceTV ( i ) ) {
             unShieldPlayer ( i );
         }
     }
-}
-public swapTargetPlayers ( ) {
-    /* swap best or second with worst */
-    swapFirst = GetRandomInt(0,1) == 1 ? true : false;
-    if ( swapFirst ) {
-        PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped!", best );
-        movePlayerToOtherTeam ( bestPlayer );
-    } else {
-        PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped!", second );
-        movePlayerToOtherTeam ( secondPlayer );
-    }
-    PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped!", worst );
-    movePlayerToOtherTeam ( worstPlayer );
-}
-
-public bool shouldBalance ( int winTeam ) {
-    return ( cvar_OSTeamBalance.IntValue == 1 ) && ( GetClientCount(true) >= cvar_MinPlayers.IntValue ) &&
-           ( ( winTeam == CS_TEAM_T && streakT >= cvar_BalanceAfterStreak.IntValue ) ||
-           ( winTeam == CS_TEAM_CT && streakCT >= cvar_BalanceAfterStreak.IntValue ) );
 }
 
 /* shield on */
@@ -190,8 +251,10 @@ public void unShieldPlayer ( int player ) {
         SetEntityRenderColor(player, 255, 255, 255, 255);
     }
 }
+
+/* move player to other team */
 public void movePlayerToOtherTeam ( int player ) {
-    if ( IsClientInGame(player) && GetClientTeam ( player ) > 1 ) {
+    if ( IsClientInGame ( player ) && GetClientTeam ( player ) > 1 ) {
         if ( ! IsPlayerAlive ( player ) ) {
             ChangeClientTeam ( player, getOtherTeamID ( player ) );
         } else {
@@ -200,9 +263,6 @@ public void movePlayerToOtherTeam ( int player ) {
         }
     }
 }
-
-
-/* Random methods */
 
 /* return players enemy team */ 
 public int getOtherTeamID ( int player ) {
@@ -249,6 +309,8 @@ public void printDebug ( ) {
     PrintToChatAll ( "best: %s", best );
     PrintToChatAll ( "second: %s", second );
     PrintToChatAll ( "worst: %s",  worst );
+    PrintToChatAll ( "playersT: %s", playersT );
+    PrintToChatAll ( "playersCT: %s",  playersCT );
 }
 
 /* determine if its a warmup round */
