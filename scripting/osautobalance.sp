@@ -45,13 +45,16 @@ public void zerofy ( ) {
     scoreCT = 0;
     streakT = 0;
     streakCT = 0;
+
+}
+public void zerofyPlayers ( ) {
     bestPlayer = -1;
+    secondPlayer = -1;
     worstPlayer = -1;
     best = "-";
     second = "-";
     worst = "-";
 }
-
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
     fixPlayerNames ( );
     printDebug ( );
@@ -105,6 +108,7 @@ public void balanceTeams ( int winTeam ) {
 } 
 
 public findTargetPlayers ( int winTeam ) {
+    zerofyPlayers ( );
     /* Pick out best and worst players */ 
     for ( int i = 1; i <= MaxClients; i++ ) {
        
