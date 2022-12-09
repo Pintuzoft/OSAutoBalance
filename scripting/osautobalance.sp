@@ -58,7 +58,7 @@ public void zerofyPlayers ( ) {
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
     fixPlayerNames ( );
     printDebug ( );
-    unShieldPlayers ( );
+    unShieldAllPlayers ( );
 }
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
     if (IsWarmupActive()) {
@@ -140,15 +140,15 @@ public findTargetPlayers ( int winTeam ) {
     }
 }
 public void shieldAllPlayers ( ) {
-    for ( int i = 0; i <= MaxClients; i++ ) {
-        if ( IsClientInGame ( i ) && ! IsClientSourceTV ( i ) ) {
+    for ( int i = 1; i <= MaxClients; i++ ) {
+        if ( IsClientInGame ( i ) && IsPlayerAlive ( i ) && ! IsClientSourceTV ( i ) ) {
             shieldPlayer ( i );
         }
     }
 }
 public void unShieldAllPlayers ( ) {
-    for ( int i = 0; i <= MaxClients; i++ ) {
-        if ( IsClientInGame ( i ) && ! IsClientSourceTV ( i ) ) {
+    for ( int i = 1; i <= MaxClients; i++ ) {
+        if ( IsClientInGame ( i ) && IsPlayerAlive(i) && ! IsClientSourceTV ( i ) ) {
             unShieldPlayer ( i );
         }
     }
