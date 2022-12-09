@@ -54,6 +54,7 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
     int winTeam = GetEventInt ( event, "winner" );
     analyzeStatistics ( winTeam );
     balanceTeams ( winTeam );
+    makeSureThereIsMoreCT ( );
 }
 /* Halftime, lets swap score & streak */
 public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast ) {
@@ -100,9 +101,6 @@ public void balanceTeams ( int winTeam ) {
             shieldAllPlayers ( );
             swapTargetPlayers ( );
         }
-    } else {
-        /* If T is larger than CT move a T over */
-        makeSureThereIsMoreCT ( );
     }
 } 
 
