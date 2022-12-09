@@ -116,35 +116,24 @@ public findTargetPlayers ( int winTeam ) {
         if ( i == immuneBest || i == immuneWorst ) {
         /* skip a user that was recently swapped */
         } else if ( IsClientInGame ( i ) && ! IsClientSourceTV ( i ) ) {
-            char name[64];
-            GetClientName (i, name, 64);
-    PrintToConsoleAll ( "---[%s]-----------", name );
             if ( winTeam == GetClientTeam ( i ) ) {
                 if ( bestPlayer < 0 ) {
-    PrintToConsoleAll ( " - set best player" );
                     bestPlayer = i;
                 } else if ( GetClientFrags(i) > GetClientFrags(bestPlayer) ) {
-    PrintToConsoleAll ( " - set best player[0]" );
                     secondPlayer = bestPlayer;
                     bestPlayer = i;
                 } else if ( secondPlayer < 0 ) {
-    PrintToConsoleAll ( " - set second player[1]" );
                     secondPlayer = i;
                 } else if ( GetClientFrags(i) > GetClientFrags(secondPlayer) ) {
-    PrintToConsoleAll ( " - set second player[1]" );
                     secondPlayer = i;
                 }
-    PrintToConsoleAll ( " - end best" );
 
             } else if ( GetClientTeam(i) >= 2 ) {
                 if ( worstPlayer < 0 ) {
-    PrintToConsoleAll ( " - set worst player[0]" );
                     worstPlayer = i;
                 } else if ( GetClientFrags(i) < GetClientFrags(worstPlayer) ) {
-    PrintToConsoleAll ( " - set worst player[1]" );
                     worstPlayer = i;
                 }
-    PrintToConsoleAll ( " - end worst" );
 
             }
         }
@@ -186,7 +175,7 @@ public bool shouldBalance ( int winTeam ) {
 
 /* shield on */
 public void shieldPlayer ( int player ) {
-    if ( IsPlayerAlive ( player ) && ! IsClientSourceTV ( player ) ) {
+    if ( IsClientInGame ( player ) && ! IsClientSourceTV ( player ) ) {
         /* Shield here */ 
         SetEntityRenderColor(player, 0, 0, 255, 100);
         SetEntProp(player, Prop_Data, "m_takedamage", 0, 1);
@@ -202,7 +191,7 @@ public void unShieldPlayer ( int player ) {
     }
 }
 public void movePlayerToOtherTeam ( int player ) {
-    if ( GetClientTeam ( player ) > 1 ) {
+    if ( IsClientInGame(player) && GetClientTeam ( player ) > 1 ) {
         if ( ! IsPlayerAlive ( player ) ) {
             ChangeClientTeam ( player, getOtherTeamID ( player ) );
         } else {
