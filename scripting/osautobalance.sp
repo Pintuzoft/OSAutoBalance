@@ -107,25 +107,32 @@ public void balanceTeams ( int winTeam ) {
 public findTargetPlayers ( int winTeam ) {
     /* Pick out best and worst players */ 
     for ( int i = 1; i <= MaxClients; i++ ) {
-    PrintToConsoleAll ( "-----------------" );
        
         if ( i == immuneBest || i == immuneWorst ) {
         /* skip a user that was recently swapped */
         } else if ( IsClientInGame ( i ) ) {
+            char name[64];
+            GetClientName (i, name, 64);
+    PrintToConsoleAll ( "---[%s]-----------", name );
             if ( winTeam == GetClientTeam ( i ) ) {
                 if ( bestPlayer < 0 ) {
+    PrintToConsoleAll ( " - set best player" );
                     bestPlayer = i;
                 } else if ( GetClientFrags(i) > GetClientFrags(bestPlayer) ) {
+    PrintToConsoleAll ( " - set second player[0]" );
                     secondPlayer = bestPlayer;
                     bestPlayer = i;
                 } else if ( GetClientFrags(i) > GetClientFrags(secondPlayer) ) {
+    PrintToConsoleAll ( " - set best player[1]" );
                     secondPlayer = i;
                 }
 
             } else if ( GetClientTeam(i) >= 2 ) {
                 if ( worstPlayer < 0 ) {
+    PrintToConsoleAll ( " - set worst player" );
                     worstPlayer = i;
                 } else if ( GetClientFrags(i) < GetClientFrags(worstPlayer) ) {
+    PrintToConsoleAll ( " - set worst player" );
                     worstPlayer = i;
                 }
             }
