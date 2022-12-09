@@ -102,6 +102,7 @@ public void balanceTeams ( int winTeam ) {
         
         /* swap the target players if we found them */
         if ( bestPlayer > 0 && secondPlayer > 0 && worstPlayer > 0 ) {
+            shieldAllPlayers ( );
             swapTargetPlayers ( );
         }
     }
@@ -149,21 +150,31 @@ public findTargetPlayers ( int winTeam ) {
         }
     }
 }
-
+public void shieldAllPlayers ( ) {
+    for ( int player = 0; player < MaxClients; player++ ) {
+        if ( IsPlayerAlive ( player ) ) {
+            shieldPlayer ( player );
+        }
+    }
+}
+public void unShieldAllPlayers ( ) {
+    for ( int player = 0; player < MaxClients; player++ ) {
+        if ( IsPlayerAlive ( player ) ) {
+            unShieldPlayer ( player );
+        }
+    }
+}
 public swapTargetPlayers ( ) {
     /* swap best or second with worst */
     swapFirst = GetRandomInt(0,1) == 1 ? true : false;
     if ( swapFirst ) {
-        shieldPlayer ( bestPlayer );
-        PrintToChatAll ( "\x07[OSAutoBalance]: %s swapped!", best );
+        PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped!", best );
         movePlayerToOtherTeam ( bestPlayer );
     } else {
-        shieldPlayer ( secondPlayer );
-        PrintToChatAll ( "\x07[OSAutoBalance]: %s swapped!", second );
+        PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped!", second );
         movePlayerToOtherTeam ( secondPlayer );
     }
-    shieldPlayer ( worstPlayer );
-    PrintToChatAll ( "\x07[OSAutoBalance]: %s swapped!", worst );
+    PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped!", worst );
     movePlayerToOtherTeam ( worstPlayer );
 }
 
@@ -177,7 +188,7 @@ public bool shouldBalance ( int winTeam ) {
 public void shieldPlayer ( int player ) {
     if ( IsPlayerAlive ( player ) && ! IsClientSourceTV ( player ) ) {
         /* Shield here */ 
-        SetEntityRenderColor(player, 0, 100, 100, 255);
+        SetEntityRenderColor(player, 0, 0, 255, 100);
         SetEntProp(player, Prop_Data, "m_takedamage", 0, 1);
     }
 }
