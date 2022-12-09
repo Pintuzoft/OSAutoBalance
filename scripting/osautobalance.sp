@@ -126,6 +126,9 @@ public findTargetPlayers ( int winTeam ) {
     PrintToConsoleAll ( " - set best player[0]" );
                     secondPlayer = bestPlayer;
                     bestPlayer = i;
+                } else if ( secondPlayer < 0 ) {
+    PrintToConsoleAll ( " - set second player[1]" );
+                    secondPlayer = i;
                 } else if ( GetClientFrags(i) > GetClientFrags(secondPlayer) ) {
     PrintToConsoleAll ( " - set second player[1]" );
                     secondPlayer = i;
@@ -134,10 +137,10 @@ public findTargetPlayers ( int winTeam ) {
 
             } else if ( GetClientTeam(i) >= 2 ) {
                 if ( worstPlayer < 0 ) {
-    PrintToConsoleAll ( " - set worst player" );
+    PrintToConsoleAll ( " - set worst player[0]" );
                     worstPlayer = i;
                 } else if ( GetClientFrags(i) < GetClientFrags(worstPlayer) ) {
-    PrintToConsoleAll ( " - set worst player" );
+    PrintToConsoleAll ( " - set worst player[1]" );
                     worstPlayer = i;
                 }
     PrintToConsoleAll ( " - end worst" );
