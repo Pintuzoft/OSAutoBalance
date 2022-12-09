@@ -92,56 +92,44 @@ public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast 
 
 public void balanceTeams ( int winTeam ) {
     /* check if we should balance players */
-    PrintToConsoleAll ( "0:" );
     if ( shouldBalance ( winTeam ) ) {
-    PrintToConsoleAll ( "1:" );
         
         /* loop all users to find target players */
         findTargetPlayers ( winTeam );
-    PrintToConsoleAll ( "2:" );
         
         /* swap the target players if we found them */
         if ( bestPlayer > 0 && secondPlayer > 0 && worstPlayer > 0 ) {
-    PrintToConsoleAll ( "3:" );
             swapTargetPlayers ( );
         }
-    PrintToConsoleAll ( "4:" );
     }
-    PrintToConsoleAll ( "5:" );
 } 
 
 public findTargetPlayers ( int winTeam ) {
-    PrintToConsoleAll ( " - 0:" );
-
     /* Pick out best and worst players */ 
     for ( int i = 1; i <= MaxClients; i++ ) {
     PrintToConsoleAll ( "-----------------" );
        
-    PrintToConsoleAll ( " - 1:" );
         if ( i == immuneBest || i == immuneWorst ) {
-    PrintToConsoleAll ( " - 2:" );
         /* skip a user that was recently swapped */
         } else if ( IsClientInGame ( i ) ) {
-    PrintToConsoleAll ( " - 3:" );
             if ( winTeam == GetClientTeam ( i ) ) {
-    PrintToConsoleAll ( " - 4:" );
-                if ( bestPlayer < 0 || GetClientFrags(i) > GetClientFrags(bestPlayer) ) {
-    PrintToConsoleAll ( " - 5:" );
+                if ( bestPlayer < 0 ) {
+                    bestPlayer = i;
+                } else if ( GetClientFrags(i) > GetClientFrags(bestPlayer) ) {
                     secondPlayer = bestPlayer;
                     bestPlayer = i;
+                } else if ( GetClientFrags(i) > GetClientFrags(secondPlayer) ) {
+                    secondPlayer = i;
                 }
-    PrintToConsoleAll ( " - 6:" );
+
             } else if ( GetClientTeam(i) >= 2 ) {
-    PrintToConsoleAll ( " - 7:" );
-                if ( worstPlayer < 0 || GetClientFrags(i) < GetClientFrags(worstPlayer) ) {
-    PrintToConsoleAll ( " - 8:" );
+                if ( worstPlayer < 0 ) {
+                    worstPlayer = i;
+                } else if ( GetClientFrags(i) < GetClientFrags(worstPlayer) ) {
                     worstPlayer = i;
                 }
-    PrintToConsoleAll ( " - 9:" );
             }
-    PrintToConsoleAll ( " - 10:" );
         }
-    PrintToConsoleAll ( " - 11:" );
     }
 }
 
