@@ -115,7 +115,7 @@ public findTargetPlayers ( int winTeam ) {
        
         if ( i == immuneBest || i == immuneWorst ) {
         /* skip a user that was recently swapped */
-        } else if ( IsClientInGame ( i ) ) {
+        } else if ( IsClientInGame ( i ) && ! IsClientSourceTV ( i ) ) {
             char name[64];
             GetClientName (i, name, 64);
     PrintToConsoleAll ( "---[%s]-----------", name );
@@ -151,16 +151,16 @@ public findTargetPlayers ( int winTeam ) {
     }
 }
 public void shieldAllPlayers ( ) {
-    for ( int player = 0; player < MaxClients; player++ ) {
-        if ( IsPlayerAlive ( player ) ) {
-            shieldPlayer ( player );
+    for ( int i = 0; i <= MaxClients; i++ ) {
+        if ( IsClientInGame ( i ) && ! IsClientSourceTV ( i ) ) {
+            shieldPlayer ( i );
         }
     }
 }
 public void unShieldAllPlayers ( ) {
-    for ( int player = 0; player < MaxClients; player++ ) {
-        if ( IsPlayerAlive ( player ) ) {
-            unShieldPlayer ( player );
+    for ( int i = 0; i <= MaxClients; i++ ) {
+        if ( IsClientInGame ( i ) && ! IsClientSourceTV ( i ) ) {
+            unShieldPlayer ( i );
         }
     }
 }
