@@ -123,11 +123,11 @@ public findTargetPlayers ( int winTeam ) {
     PrintToConsoleAll ( " - set best player" );
                     bestPlayer = i;
                 } else if ( GetClientFrags(i) > GetClientFrags(bestPlayer) ) {
-    PrintToConsoleAll ( " - set second player[0]" );
+    PrintToConsoleAll ( " - set best player[0]" );
                     secondPlayer = bestPlayer;
                     bestPlayer = i;
                 } else if ( GetClientFrags(i) > GetClientFrags(secondPlayer) ) {
-    PrintToConsoleAll ( " - set best player[1]" );
+    PrintToConsoleAll ( " - set second player[1]" );
                     secondPlayer = i;
                 }
     PrintToConsoleAll ( " - end best" );
