@@ -21,6 +21,7 @@ char best[64];
 char second[64];
 char worst[64];
 char movePlayer[64];
+char team[64];
 bool swapFirst;
 int winTeam;
 
@@ -52,7 +53,6 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
         zerofy();
         return;
     }
-    winTeam = 0;
     winTeam = GetEventInt ( event, "winner" );
     printDebug ( );    
     CreateTimer ( 1.0, DelayBalanceTeams, TIMER_DATA_HNDL_CLOSE );
@@ -70,8 +70,8 @@ public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast 
 
 public Action DelayBalanceTeams ( Handle timer ) {  
     analyzeStatistics ( );
-    makeSureThereIsMoreCT ( );
-    return ;
+    makeSureThereIsMoreCT ( ); 
+    return Plugin_Continue;
 }
 /* analyze statistical information */
 public void analyzeStatistics ( ) {
@@ -141,7 +141,7 @@ public void makeSureThereIsMoreCT ( ) {
         }
     PrintToConsoleAll ( "9:" );
     }
-    printDebug
+    printDebug ( );
     if ( playersT > playersCT && playerT < 999 ) {
     PrintToConsoleAll ( "10:" );
         shieldAllPlayers ( );
@@ -272,7 +272,7 @@ public void unShieldPlayer ( int player ) {
 public void movePlayerToOtherTeam ( int player ) {
     if ( IsClientInGame ( player ) && GetClientTeam ( player ) > 1 ) {
         GetClientName (player, movePlayer, 64);
-        char team[64] = getOtherTeamName ( player );
+        getOtherTeamName ( player );
         PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped to %s!", movePlayer, team );
         if ( ! IsPlayerAlive ( player ) ) {
             ChangeClientTeam ( player, getOtherTeamID ( player ) );
@@ -288,8 +288,15 @@ public int getOtherTeamID ( int player ) {
     return ( GetClientTeam(player) == 2 ? 3 : 2 );
 }
 /* return players enemy team name*/ 
-public char getOtherTeamName ( int player ) {
-    return ( GetClientTeam(player) == 2 ? "CT" : "T" );
+public void getOtherTeamName ( int player ) {
+    switch ( GetClientTeam(player) ) {
+        case CS_TEAM_T: {
+            team = "CT";
+        }
+        case CS_TEAM_CT: {
+            team = "T";
+        }
+    }
 }
 
 /* store player names */
@@ -337,6 +344,6 @@ public void printDebug ( ) {
 }
 
 /* determine if its a warmup round */
-bool IsWarmupActive() {
+bool IsWarmupActive ( ) {
 	return view_as<bool>(GameRules_GetProp("m_bWarmupPeriod"));
 }
