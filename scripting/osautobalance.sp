@@ -111,39 +111,39 @@ public void balanceTeams ( ) {
 
 /* make sure CT is the bigger team if its not */
 public void makeSureThereIsMoreCT ( ) {
-    PrintToConsoleAll ( "0:" )
+    PrintToConsoleAll ( "0:" );
     int playerT = 999;
     for ( int i = 1; i <= MaxClients; i++ ) {
-    PrintToConsoleAll ( "1:" )
+    PrintToConsoleAll ( "1:" );
         if ( IsClientInGame ( i ) && ! IsClientSourceTV ( i ) ) {
     PrintToConsoleAll ( "2:" )
             switch ( GetClientTeam(i) ) {
                 case CS_TEAM_T: {
-    PrintToConsoleAll ( "3:" )
+    PrintToConsoleAll ( "3:" );
                     ++playersT;
                     PrintToConsoleAll ( "i:%d", i );
                     PrintToConsoleAll ( "playerT:%d", playerT );
                     if ( playerT == 999 ) {
-    PrintToConsoleAll ( "4:" )
+    PrintToConsoleAll ( "4:" );
                         playerT = i;
                     } else if ( GetClientFrags(i) < GetClientFrags(playerT) ) {
-    PrintToConsoleAll ( "5:" )
+    PrintToConsoleAll ( "5:" );
                         playerT = i;
                     }
-    PrintToConsoleAll ( "6:" )
+    PrintToConsoleAll ( "6:" );
                 }
                 case CS_TEAM_CT: {
-    PrintToConsoleAll ( "7:" )
+    PrintToConsoleAll ( "7:" );
                     ++playersCT;
                 }
             }
-    PrintToConsoleAll ( "8:" )
+    PrintToConsoleAll ( "8:" );
         }
-    PrintToConsoleAll ( "9:" )
+    PrintToConsoleAll ( "9:" );
     }
     printDebug
     if ( playersT > playersCT && playerT < 999 ) {
-    PrintToConsoleAll ( "10:" )
+    PrintToConsoleAll ( "10:" );
         shieldAllPlayers ( );
         movePlayerToOtherTeam ( playerT );
     }
