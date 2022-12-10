@@ -118,24 +118,27 @@ public void makeSureThereIsMoreCT ( ) {
                     ++playersT;
                     PrintToConsoleAll ( "i:%d", i );
                     PrintToConsoleAll ( "playerT:%d", playerT );
-                    
-                    if ( GetClientFrags(i) < GetClientFrags(playerT) ) {
+                    if ( playerT == 999 ) {
     PrintToConsoleAll ( "4:" )
                         playerT = i;
-                    }
+                    } else if ( GetClientFrags(i) < GetClientFrags(playerT) ) {
     PrintToConsoleAll ( "5:" )
+                        playerT = i;
+                    }
+    PrintToConsoleAll ( "6:" )
                 }
                 case CS_TEAM_CT: {
-    PrintToConsoleAll ( "6:" )
+    PrintToConsoleAll ( "7:" )
                     ++playersCT;
                 }
             }
-    PrintToConsoleAll ( "7:" )
-        }
     PrintToConsoleAll ( "8:" )
+        }
+    PrintToConsoleAll ( "9:" )
     }
     printDebug
     if ( playersT > playersCT && playerT < 999 ) {
+    PrintToConsoleAll ( "10:" )
         shieldAllPlayers ( );
         movePlayerToOtherTeam ( playerT );
     }
