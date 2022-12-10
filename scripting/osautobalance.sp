@@ -20,7 +20,9 @@ int immuneWorst;
 char best[64];
 char second[64];
 char worst[64];
+char movePlayer[64];
 bool swapFirst;
+int winTeam;
 
 public Plugin myinfo = {
 	name = "OSAutoBalance",
@@ -50,11 +52,10 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
         zerofy();
         return;
     }
-    printDebug ( );
-    int winTeam = GetEventInt ( event, "winner" );
-    analyzeStatistics ( winTeam );
-    balanceTeams ( winTeam );
-    makeSureThereIsMoreCT ( );
+    winTeam = 0;
+    winTeam = GetEventInt ( event, "winner" );
+    printDebug ( );    
+    CreateTimer ( 1.0, DelayBalanceTeams, TIMER_DATA_HNDL_CLOSE );
 }
 /* Halftime, lets swap score & streak */
 public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast ) {
@@ -67,9 +68,13 @@ public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast 
 }
 /*** END EVENTS ***/
 
-
+public Action DelayBalanceTeams ( Handle timer ) {  
+    analyzeStatistics ( );
+    makeSureThereIsMoreCT ( );
+    return ;
+}
 /* analyze statistical information */
-public void analyzeStatistics ( int winTeam ) {
+public void analyzeStatistics ( ) {
     switch ( winTeam ) {
         case CS_TEAM_T: {
             ++scoreT;
@@ -89,12 +94,12 @@ public void analyzeStatistics ( int winTeam ) {
 }
 
 /* balance teams  */
-public void balanceTeams ( int winTeam ) {
+public void balanceTeams ( ) {
     /* check if we should balance players */
-    if ( shouldBalance ( winTeam ) ) {
+    if ( shouldBalance ( ) ) {
         
         /* loop all users to find target players */
-        findTargetPlayers ( winTeam );
+        findTargetPlayers ( );
         
         /* swap the target players if we found them */
         if ( bestPlayer > 0 && secondPlayer > 0 && worstPlayer > 0 ) {
@@ -145,7 +150,7 @@ public void makeSureThereIsMoreCT ( ) {
 }
 
 /* find the target users */
-public findTargetPlayers ( int winTeam ) {
+public findTargetPlayers ( ) {
     zerofyPlayers ( );
     /* Pick out best and worst players */ 
     for ( int i = 1; i <= MaxClients; i++ ) {
@@ -183,15 +188,13 @@ public swapTargetPlayers ( ) {
     /* swap best or second with worst */
     swapFirst = GetRandomInt(0,1) == 1 ? true : false;
     if ( swapFirst ) {
-        PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped!", best );
         movePlayerToOtherTeam ( bestPlayer );
         immuneBest = bestPlayer;
     } else {
-        PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped!", second );
         movePlayerToOtherTeam ( secondPlayer );
         immuneBest = bestPlayer;
     }
-    PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped!", worst );
+    
     movePlayerToOtherTeam ( worstPlayer );
     immuneBest = worstPlayer;
 
@@ -223,7 +226,7 @@ public void zerofyPlayers ( ) {
     playersCT = 0;
 }
 
-public bool shouldBalance ( int winTeam ) {
+public bool shouldBalance (  ) {
     return ( cvar_OSTeamBalance.IntValue == 1 ) && ( GetClientCount(true) >= cvar_MinPlayers.IntValue ) &&
            ( ( winTeam == CS_TEAM_T && streakT >= cvar_BalanceAfterStreak.IntValue ) ||
            ( winTeam == CS_TEAM_CT && streakCT >= cvar_BalanceAfterStreak.IntValue ) );
@@ -268,6 +271,9 @@ public void unShieldPlayer ( int player ) {
 /* move player to other team */
 public void movePlayerToOtherTeam ( int player ) {
     if ( IsClientInGame ( player ) && GetClientTeam ( player ) > 1 ) {
+        GetClientName (player, movePlayer, 64);
+        char team[64] = getOtherTeamName ( player );
+        PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped to %s!", movePlayer, team );
         if ( ! IsPlayerAlive ( player ) ) {
             ChangeClientTeam ( player, getOtherTeamID ( player ) );
         } else {
@@ -280,6 +286,10 @@ public void movePlayerToOtherTeam ( int player ) {
 /* return players enemy team */ 
 public int getOtherTeamID ( int player ) {
     return ( GetClientTeam(player) == 2 ? 3 : 2 );
+}
+/* return players enemy team name*/ 
+public char getOtherTeamName ( int player ) {
+    return ( GetClientTeam(player) == 2 ? "CT" : "T" );
 }
 
 /* store player names */
