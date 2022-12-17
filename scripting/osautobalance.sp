@@ -114,7 +114,6 @@ public Action Command_PrintInfo ( int client, int args ) {
 public void swapPlayer ( int player ) {
     char name[65];
     int otherTeam;
-
     GetClientName ( player, name, 64 );
     otherTeam = getOtherTeam ( GetClientTeam(player) );
 
@@ -125,7 +124,7 @@ public void swapPlayer ( int player ) {
         CS_SwitchTeam ( player, otherTeam );
         CS_UpdateClientModel ( player );
     }
-    PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped to %s!", name, otherTeam );
+    PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped to %s!", name, (otherTeam==2?"Terrorists":"Counter-Terrorists") );
 }
 /* unshield all players */
 public void unShieldAllPlayers ( ) {
@@ -135,7 +134,7 @@ public void unShieldAllPlayers ( ) {
         }
     }
 }
-
+ 
 /* shield off */
 public void shieldPlayer ( int player ) {
     if ( IsClientInGame ( player ) && ! IsClientSourceTV ( player ) ) {
@@ -207,6 +206,8 @@ public void gatherTeamsData ( int winTeam, loserTeam ) {
             GetClientName ( player, name, 64 );
             PrintToConsoleAll ( "*** Checking: %s", name );
             int position = getScoreBoardPosition ( player );
+            PrintToConsoleAll ( " - %s pos: %d", name, position );
+
             if ( position == 1 ) {
                 team[playerTeam][BEST] = player;
                 PrintToConsoleAll ( "added %s as BEST in %d", name, playerTeam );
@@ -223,11 +224,11 @@ public void gatherTeamsData ( int winTeam, loserTeam ) {
 
 public int getScoreBoardPosition ( int player ) {
     int score = CS_GetClientContributionScore ( player );
-    int team = GetClientTeam ( player );
+    int clientTeam = GetClientTeam ( player );
     int position = 1;
     for ( int other = 1; other <= MaxClients; other++ ) {
         if ( playerIsReal ( other ) && 
-             GetClientTeam ( other ) == team &&
+             GetClientTeam ( other ) == clientTeam &&
              CS_GetClientContributionScore ( other ) > score ) {
                 ++position;
         }
