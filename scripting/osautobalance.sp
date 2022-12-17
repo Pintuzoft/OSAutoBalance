@@ -40,6 +40,11 @@ public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcas
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
     if ( IsWarmupActive ( ) ) {
         zerofy ( );
+        team[CS_TEAM_T][SIZE] = GetTeamClientCount ( CS_TEAM_T );
+        team[CS_TEAM_CT][SIZE] = GetTeamClientCount ( CS_TEAM_CT );
+        if ( team[CS_TEAM_T][SIZE] > team[CS_TEAM_CT][SIZE] ) {
+            moveRandomTerrorist (  );
+        }
         return;
     }
     int winTeam = GetEventInt(event, "winner");
@@ -66,6 +71,19 @@ public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast 
 }
 
 /*** METHODS ***/
+
+public void moveRandomTerrorist ( ) {
+    int random = GetRandomInt ( 0, team[CS_TEAM_T][SIZE] );
+    for ( int player = 1; player <= MaxClients; player++ ) {
+        if ( playerIsReal ( player ) && GetClientTeam(player) == CS_TEAM_T ) {
+            --random;
+            if ( random <= 0 ) {
+                swapPlayer ( player );
+                return;
+            }
+        }
+    }
+}
 
 public void swapPlayer ( int player ) {
     char name[65];
