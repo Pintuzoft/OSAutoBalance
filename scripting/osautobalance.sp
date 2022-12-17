@@ -14,8 +14,6 @@ static const int WORST = 7;
 static const int NUMTEAMVALUES = 8;
 int team[4][8];
 
-int isWarmup;
-
 ConVar cvar_BalanceAfterStreak;
 
 public Plugin myinfo = {
@@ -31,28 +29,15 @@ public void OnPluginStart ( ) {
     HookEvent ( "round_start", Event_RoundStart );
     HookEvent ( "round_end", Event_RoundEnd );
     HookEvent ( "announce_phase_end", Event_HalfTime );
-    isWarmup = 1;
     AutoExecConfig ( true, "osautobalance" );
 }
  
 
 /*** EVENTS ***/
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
-    isWarmup = GameRules_GetProp("m_bWarmupPeriod");
     unShieldAllPlayers ( );
 }
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
-    if ( isWarmup == 1 ) {
-        zerofy ( );
-        PrintToChatAll ( "End of warmup!" );
-        team[CS_TEAM_T][SIZE] = GetTeamClientCount ( CS_TEAM_T );
-        team[CS_TEAM_CT][SIZE] = GetTeamClientCount ( CS_TEAM_CT );
-        if ( moreTerrorists ( ) ) {
-            moveRandomTerrorist (  );
-        }
-        isWarmup = 0;
-        return;
-    }
     int winTeam = GetEventInt(event, "winner");
     int loserTeam = getOtherTeam ( winTeam );
 
@@ -64,7 +49,11 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
         swapPlayersOnStreak ( winTeam, loserTeam );
         
     } else if ( moreTerrorists ( ) ) {
-        swapPlayer ( team[CS_TEAM_T][WORST] );
+        if ( team[CS_TEAM_T][WORST] > 0 ) {
+            swapPlayer ( team[CS_TEAM_T][WORST] );
+        } else {
+            moveRandomTerrorist (  );
+        }
     }
 }
 public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast ) {
@@ -146,7 +135,9 @@ public bool shouldBalance ( winTeam, loserTeam ) {
 /* swap players when we hit a streak */
 public void swapPlayersOnStreak ( int winTeam, int loserTeam ) {
     if ( moreTerrorists ( ) ) {
-        if ( terroristsWon ( ) ) {
+        if ( team[CS_TEAM_T][WORST] < 0 ) {
+            moveRandomTerrorist (  );
+        } else if ( terroristsWon ( ) ) {
             swapPlayer ( team[CS_TEAM_T][WORST] );
         } else {
             swapPlayer ( team[CS_TEAM_CT][BEST] );
