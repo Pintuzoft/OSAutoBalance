@@ -26,7 +26,6 @@ public Plugin myinfo = {
  
 public void OnPluginStart ( ) {
     cvar_BalanceAfterStreak = CreateConVar ( "os_balanceafterstreak", "3", "Balance teams after X streak", _, true, 1.0 );
-    RegConsoleCmd ( "sm_printinfo", Command_PrintInfo, "Print known information"  );
     HookEvent ( "round_start", Event_RoundStart );
     HookEvent ( "round_end", Event_RoundEnd );
     HookEvent ( "announce_phase_end", Event_HalfTime );
@@ -66,56 +65,15 @@ public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast 
     }
 }
 
-/*** COMMANDS ***/
-public Action Command_PrintInfo ( int client, int args ) {
-    char name[64];
-    PrintToChat ( client, "*** Counter-Terrorists ***" );
-    PrintToChat ( client, "  Winner: %d", team[CS_TEAM_CT][WINNER] );
-    PrintToChat ( client, "    Wins: %d", team[CS_TEAM_CT][WINS] );
-    PrintToChat ( client, "  Streak: %d", team[CS_TEAM_CT][STREAK] );
-    PrintToChat ( client, "   Kills: %d", team[CS_TEAM_CT][KILLS] );
-    PrintToChat ( client, "    Size: %d", team[CS_TEAM_CT][SIZE] );
-    if ( team[CS_TEAM_CT][BEST] > 0 ) {
-        GetClientName ( team[CS_TEAM_CT][BEST], name, 64 );
-        PrintToChat ( client, "    Best: %s", name );
-    }
-    if ( team[CS_TEAM_T][SECOND] > 0 ) {
-        GetClientName ( team[CS_TEAM_CT][SECOND], name, 64 );
-        PrintToChat ( client, "  Second: %s", name );
-    }
-    if ( team[CS_TEAM_T][WORST] > 0 ) {
-        GetClientName ( team[CS_TEAM_CT][WORST], name, 64 );
-        PrintToChat ( client, "   Worst: %s", name );
-    }
-    PrintToChat ( client, "*** Terrorists ***" );
-    PrintToChat ( client, "  Winner: %d", team[CS_TEAM_T][WINNER] );
-    PrintToChat ( client, "    Wins: %d", team[CS_TEAM_T][WINS] );
-    PrintToChat ( client, "  Streak: %d", team[CS_TEAM_T][STREAK] );
-    PrintToChat ( client, "   Kills: %d", team[CS_TEAM_T][KILLS] );
-    PrintToChat ( client, "    Size: %d", team[CS_TEAM_T][SIZE] );
-    if ( team[CS_TEAM_T][BEST] > 0 ) {
-        GetClientName ( team[CS_TEAM_T][BEST], name, 64 );
-        PrintToChat ( client, "    Best: %s", name );
-    }
-    if ( team[CS_TEAM_T][SECOND] > 0 ) {
-        GetClientName ( team[CS_TEAM_T][SECOND], name, 64 );
-        PrintToChat ( client, "  Second: %s", name );
-    }
-    if ( team[CS_TEAM_T][WORST] > 0 ) {
-        GetClientName ( team[CS_TEAM_T][WORST], name, 64 );
-        PrintToChat ( client, "   Worst: %s", name );
-    }
-    PrintToChat ( client, "*** End of PrintInfo ***");
-    return Plugin_Handled;
-}
-
 /*** METHODS ***/
 
 public void swapPlayer ( int player ) {
     char name[65];
+    char teamName[24];
     int otherTeam;
     GetClientName ( player, name, 64 );
     otherTeam = getOtherTeam ( GetClientTeam(player) );
+    teamName = (otherTeam == 2 ? "Terrorists" : "Counter-Terrorists");
 
     shieldPlayer ( player );
     if ( ! IsPlayerAlive ( player ) ) {
@@ -124,8 +82,10 @@ public void swapPlayer ( int player ) {
         CS_SwitchTeam ( player, otherTeam );
         CS_UpdateClientModel ( player );
     }
-    PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped to %s!", name, (otherTeam==2?"Terrorists":"Counter-Terrorists") );
+
+    PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped to %s!", name, teamName );
 }
+
 /* unshield all players */
 public void unShieldAllPlayers ( ) {
     for ( int player = 1; player <= MaxClients; player++ ) {
@@ -206,24 +166,19 @@ public void gatherTeamsData ( int winTeam, loserTeam ) {
         if ( playerIsReal ( player ) ) {
             playerTeam = GetClientTeam(player);
             GetClientName ( player, name, 64 );
-            PrintToConsoleAll ( "*** Checking: %s", name );
             int position = getScoreBoardPosition ( player );
-            PrintToConsoleAll ( " - %s pos: %d", name, position );
-
             if ( position == 1 ) {
                 team[playerTeam][BEST] = player;
-                PrintToConsoleAll ( "added %s as BEST in %d", name, playerTeam );
             } else if ( position == 2 ) {
                 team[playerTeam][SECOND] = player;
-                PrintToConsoleAll ( "added %s as SECOND in %d", name, playerTeam );
             } else if ( position == team[playerTeam][SIZE] ) {
                 team[playerTeam][WORST] = player;
-                PrintToConsoleAll ( "added %s as WORST in %d", name, playerTeam );
             }
         }
     }
 }
 
+/* get player position in the scoreboard */
 public int getScoreBoardPosition ( int player ) {
     int score = CS_GetClientContributionScore ( player );
     int clientTeam = GetClientTeam ( player );
@@ -231,7 +186,7 @@ public int getScoreBoardPosition ( int player ) {
     for ( int other = 1; other <= MaxClients; other++ ) {
         if ( playerIsReal ( other ) && 
              GetClientTeam ( other ) == clientTeam &&
-             CS_GetClientContributionScore ( other ) > score ) {
+             CS_GetClientContributionScore ( other ) >= score ) {
                 ++position;
         }
     }
