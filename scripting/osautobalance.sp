@@ -196,8 +196,10 @@ public void gatherTeamsData ( int winTeam, loserTeam ) {
     setWinsAndStreak ( winTeam );
     char name[64];
       
-    team[playerTeam][SIZE] = GetTeamClientCount ( playerTeam );
-    team[playerTeam][KILLS] = GetTeamScore ( playerTeam );
+    team[CS_TEAM_T][SIZE] = GetTeamClientCount ( CS_TEAM_T );
+    team[CS_TEAM_T][KILLS] = GetTeamScore ( CS_TEAM_T );
+    team[CS_TEAM_CT][SIZE] = GetTeamClientCount ( CS_TEAM_CT );
+    team[CS_TEAM_CT][KILLS] = GetTeamScore ( CS_TEAM_CT );
 
     /* loop players to set positions */
     for ( int player = 1; player <= MaxClients; player++ ) {
