@@ -83,7 +83,7 @@ public void swapPlayer ( int player ) {
         CS_UpdateClientModel ( player );
     }
 
-    PrintToChatAll ( "\x03[OSAutoBalance]: %s swapped to %s!", name, teamName );
+    PrintToChatAll ( " \x02[OSAutoBalance]: \x07%s swapped to %s!", name, teamName );
 }
 
 /* unshield all players */
