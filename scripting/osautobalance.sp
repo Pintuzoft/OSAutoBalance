@@ -14,6 +14,8 @@ static const int WORST = 7;
 static const int NUMTEAMVALUES = 8;
 int team[4][8];
 
+int isWarmup;
+
 ConVar cvar_BalanceAfterStreak;
 
 public Plugin myinfo = {
@@ -35,10 +37,11 @@ public void OnPluginStart ( ) {
 
 /*** EVENTS ***/
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
+    isWarmup = GameRules_GetProp("m_bWarmupPeriod");
     unShieldAllPlayers ( );
 }
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
-    if ( IsWarmupActive ( ) ) {
+    if ( isWarmup == 1 ) {
         zerofy ( );
         PrintToChatAll ( "End of warmup!" );
         team[CS_TEAM_T][SIZE] = GetTeamClientCount ( CS_TEAM_T );
@@ -46,6 +49,7 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
         if ( moreTerrorists ( ) ) {
             moveRandomTerrorist (  );
         }
+        isWarmup = 0;
         return;
     }
     int winTeam = GetEventInt(event, "winner");
@@ -262,11 +266,4 @@ public void zerofy ( ) {
     team[CS_TEAM_CT][KILLS] = 0;
     team[CS_TEAM_CT][SIZE] = 0;
 }
- 
-/* determine if its a warmup round */
-bool IsWarmupActive ( ) {
-	return view_as<bool>(GameRules_GetProp("m_bWarmupPeriod"));
-}
-
-
-
+  
