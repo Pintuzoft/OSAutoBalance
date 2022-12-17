@@ -223,9 +223,12 @@ public void gatherTeamsData ( int winTeam, loserTeam ) {
 
 public int getScoreBoardPosition ( int player ) {
     int score = CS_GetClientContributionScore ( player );
+    int team = GetClientTeam ( player );
     int position = 1;
     for ( int other = 1; other <= MaxClients; other++ ) {
-        if ( playerIsReal ( other ) && CS_GetClientContributionScore ( other ) > score ) {
+        if ( playerIsReal ( other ) && 
+             GetClientTeam ( other ) == team &&
+             CS_GetClientContributionScore ( other ) > score ) {
                 ++position;
         }
     }
