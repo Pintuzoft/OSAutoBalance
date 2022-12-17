@@ -77,7 +77,7 @@ public void moveRandomTerrorist ( ) {
     for ( int player = 1; player <= MaxClients; player++ ) {
         if ( playerIsReal ( player ) && GetClientTeam(player) == CS_TEAM_T ) {
             --random;
-            if ( random <= 0 ) {
+            if ( random <= 1 ) {
                 swapPlayer ( player );
                 return;
             }
