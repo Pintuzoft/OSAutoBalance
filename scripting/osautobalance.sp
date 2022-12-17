@@ -14,7 +14,7 @@ static const int WORST = 7;
 static const int NUMTEAMVALUES = 8;
 int team[4][8];
 
-//ConVar cvar_BalanceAfterStreak;
+ConVar cvar_BalanceAfterStreak;
 
 public Plugin myinfo = {
 	name = "OSAutoBalance",
@@ -25,7 +25,8 @@ public Plugin myinfo = {
 }
  
 public void OnPluginStart ( ) {
-//    cvar_BalanceAfterStreak = CreateConVar ( "os_balanceafterstreak", "3", "Balance teams after X streak", _, true, 1.0 );
+    cvar_BalanceAfterStreak = CreateConVar ( "os_balanceafterstreak", "3", "Balance teams after X streak", _, true, 1.0 );
+    RegConsoleCmd ( "sm_printinfo", Command_PrintInfo, "Print known information"  );
     HookEvent ( "round_start", Event_RoundStart );
     HookEvent ( "round_end", Event_RoundEnd );
     HookEvent ( "announce_phase_end", Event_HalfTime );
@@ -65,6 +66,48 @@ public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast 
     }
 }
 
+/*** COMMANDS ***/
+public Action Command_PrintInfo ( int client, int args ) {
+    char name[64];
+    PrintToChat ( client, "*** Counter-Terrorists ***" );
+    PrintToChat ( client, "  Winner: %d", team[CS_TEAM_CT][WINNER] );
+    PrintToChat ( client, "    Wins: %d", team[CS_TEAM_CT][WINS] );
+    PrintToChat ( client, "  Streak: %d", team[CS_TEAM_CT][STREAK] );
+    PrintToChat ( client, "   Kills: %d", team[CS_TEAM_CT][KILLS] );
+    PrintToChat ( client, "    Size: %d", team[CS_TEAM_CT][SIZE] );
+    if ( team[CS_TEAM_CT][BEST] > 0 ) {
+        GetClientName ( team[CS_TEAM_CT][BEST], name, 64 );
+        PrintToChat ( client, "    Best: %s", name );
+    }
+    if ( team[CS_TEAM_T][SECOND] > 0 ) {
+        GetClientName ( team[CS_TEAM_CT][SECOND], name, 64 );
+        PrintToChat ( client, "  Second: %s", name );
+    }
+    if ( team[CS_TEAM_T][WORST] > 0 ) {
+        GetClientName ( team[CS_TEAM_CT][WORST], name, 64 );
+        PrintToChat ( client, "   Worst: %s", name );
+    }
+    PrintToChat ( client, "*** Terrorists ***" );
+    PrintToChat ( client, "  Winner: %d", team[CS_TEAM_T][WINNER] );
+    PrintToChat ( client, "    Wins: %d", team[CS_TEAM_T][WINS] );
+    PrintToChat ( client, "  Streak: %d", team[CS_TEAM_T][STREAK] );
+    PrintToChat ( client, "   Kills: %d", team[CS_TEAM_T][KILLS] );
+    PrintToChat ( client, "    Size: %d", team[CS_TEAM_T][SIZE] );
+    if ( team[CS_TEAM_T][BEST] > 0 ) {
+        GetClientName ( team[CS_TEAM_T][BEST], name, 64 );
+        PrintToChat ( client, "    Best: %s", name );
+    }
+    if ( team[CS_TEAM_T][SECOND] > 0 ) {
+        GetClientName ( team[CS_TEAM_T][SECOND], name, 64 );
+        PrintToChat ( client, "  Second: %s", name );
+    }
+    if ( team[CS_TEAM_T][WORST] > 0 ) {
+        GetClientName ( team[CS_TEAM_T][WORST], name, 64 );
+        PrintToChat ( client, "   Worst: %s", name );
+    }
+    PrintToChat ( client, "*** End of PrintInfo ***");
+    return Plugin_Handled;
+}
 
 /*** METHODS ***/
 
@@ -113,7 +156,8 @@ public void unShieldPlayer ( int player ) {
 
 /* return true if we should balance the teams */
 public bool shouldBalance ( winTeam, loserTeam ) {
-    return ( team[winTeam][STREAK] >= 3 && GetClientCount(true) >= 6 );
+    return ( team[winTeam][STREAK] >= cvar_BalanceAfterStreak.IntValue && 
+             GetClientCount(true) >= 6 );
 }
 
 /* swap players when we hit a streak */
