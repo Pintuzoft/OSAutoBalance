@@ -31,6 +31,7 @@ public void OnPluginStart ( ) {
     HookEvent ( "round_start", Event_RoundStart );
     HookEvent ( "round_end", Event_RoundEnd );
     HookEvent ( "announce_phase_end", Event_HalfTime );
+    isWarmup = 1;
     AutoExecConfig ( true, "osautobalance" );
 }
  
