@@ -40,9 +40,10 @@ public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcas
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
     if ( IsWarmupActive ( ) ) {
         zerofy ( );
+        PrintToChatAll ( "End of warmup!" );
         team[CS_TEAM_T][SIZE] = GetTeamClientCount ( CS_TEAM_T );
         team[CS_TEAM_CT][SIZE] = GetTeamClientCount ( CS_TEAM_CT );
-        if ( team[CS_TEAM_T][SIZE] > team[CS_TEAM_CT][SIZE] ) {
+        if ( moreTerrorists ( ) ) {
             moveRandomTerrorist (  );
         }
         return;
