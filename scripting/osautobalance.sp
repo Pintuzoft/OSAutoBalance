@@ -195,6 +195,8 @@ public void gatherTeamsData ( int winTeam, loserTeam ) {
     int playerTeam;
     resetTeams ( );
     setWinsAndStreak ( winTeam );
+    char name[64];
+    char name2[64]
 
     /* loop all players */
     for ( int player = 1; player <= MaxClients; player++ ) {
@@ -202,6 +204,9 @@ public void gatherTeamsData ( int winTeam, loserTeam ) {
         if ( playerIsReal ( player ) ) {
             /* get the player team and store it */
             playerTeam = GetClientTeam(player);
+            GetClientName ( player, name, 64 );
+
+            PrintToConsoleAll ( "*** Checking: %s", name );
 
             /* store player count and frags in the team */
             team[playerTeam][SIZE]++;
@@ -210,19 +215,25 @@ public void gatherTeamsData ( int winTeam, loserTeam ) {
             /* first player is the best we know about */
             if ( team[playerTeam][BEST] < 0 ) {
                 team[playerTeam][BEST] = player;
+                PrintToConsoleAll ( "Added %s as Best in team %d", name, playerTeam );
             
             /* if next player is better store that player as best */
             } else if ( GetClientFrags(player) > GetClientFrags(team[playerTeam][BEST]) ) {
                 team[playerTeam][SECOND] = team[playerTeam][BEST];
                 team[playerTeam][BEST] = player;
+                GetClientName ( team[playerTeam][BEST], name2, 64 );
+                PrintToConsoleAll ( "Added %s as Best in team %d", name, playerTeam );
+                PrintToConsoleAll ( "Added %s as Second in team %d", name2, playerTeam );
             
             /* if the player wasnt better and we have no worst player, assume hes the worst */
             } else if ( team[playerTeam][WORST] < 0 ) {
                 team[playerTeam][WORST] = player;
+                PrintToConsoleAll ( "Added %s as Worst in team %d", name, playerTeam );
             
             /* if player is worst than the worst player, lets assume hes the worst */
             } else if ( GetClientFrags(player) < GetClientFrags(team[playerTeam][WORST] ) ) {
                 team[playerTeam][WORST] = player;
+                PrintToConsoleAll ( "Added %s as Worst in team %d", name, playerTeam );
             }
             
         }
