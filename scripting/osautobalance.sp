@@ -196,48 +196,40 @@ public void gatherTeamsData ( int winTeam, loserTeam ) {
     resetTeams ( );
     setWinsAndStreak ( winTeam );
     char name[64];
-    char name2[64]
+      
+    team[playerTeam][SIZE] = GetTeamClientCount ( playerTeam );
+    team[playerTeam][KILLS] = GetTeamScore ( playerTeam );
 
-    /* loop all players */
+    /* loop players to set positions */
     for ( int player = 1; player <= MaxClients; player++ ) {
-        /* make sure its a real humanoid */
         if ( playerIsReal ( player ) ) {
-            /* get the player team and store it */
             playerTeam = GetClientTeam(player);
             GetClientName ( player, name, 64 );
-
             PrintToConsoleAll ( "*** Checking: %s", name );
-
-            /* store player count and frags in the team */
-            team[playerTeam][SIZE]++;
-            team[playerTeam][KILLS] += GetClientFrags ( player );
-
-            /* first player is the best we know about */
-            if ( team[playerTeam][BEST] < 0 ) {
+            int position = getScoreBoardPosition ( player );
+            if ( position == 1 ) {
                 team[playerTeam][BEST] = player;
-                PrintToConsoleAll ( "Added %s as Best in team %d", name, playerTeam );
-            
-            /* if next player is better store that player as best */
-            } else if ( GetClientFrags(player) > GetClientFrags(team[playerTeam][BEST]) ) {
-                team[playerTeam][SECOND] = team[playerTeam][BEST];
-                team[playerTeam][BEST] = player;
-                GetClientName ( team[playerTeam][BEST], name2, 64 );
-                PrintToConsoleAll ( "Added %s as Best in team %d", name, playerTeam );
-                PrintToConsoleAll ( "Added %s as Second in team %d", name2, playerTeam );
-            
-            /* if the player wasnt better and we have no worst player, assume hes the worst */
-            } else if ( team[playerTeam][WORST] < 0 ) {
+                PrintToConsoleAll ( "added %s as BEST in %d", name, playerTeam );
+            } else if ( position == 2 ) {
+                team[playerTeam][SECOND] = player;
+                PrintToConsoleAll ( "added %s as SECOND in %d", name, playerTeam );
+            } else if ( position == team[playerTeam][SIZE] ) {
                 team[playerTeam][WORST] = player;
-                PrintToConsoleAll ( "Added %s as Worst in team %d", name, playerTeam );
-            
-            /* if player is worst than the worst player, lets assume hes the worst */
-            } else if ( GetClientFrags(player) < GetClientFrags(team[playerTeam][WORST] ) ) {
-                team[playerTeam][WORST] = player;
-                PrintToConsoleAll ( "Added %s as Worst in team %d", name, playerTeam );
+                PrintToConsoleAll ( "added %s as WORST in %d", name, playerTeam );
             }
-            
         }
     }
+}
+
+public int getScoreBoardPosition ( int player ) {
+    int score = CS_GetClientContributionScore ( player );
+    int position = 1;
+    for ( int other = 1; other <= MaxClients; other++ ) {
+        if ( playerIsReal ( other ) && CS_GetClientContributionScore ( other ) > score ) {
+                ++position;
+        }
+    }
+    return position;
 }
 
 /* return true if players team won the round */
