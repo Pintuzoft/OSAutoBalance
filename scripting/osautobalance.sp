@@ -142,7 +142,7 @@ public bool shouldBalance ( winTeam, loserTeam ) {
     if ( GetClientCount(true) >= 6 ) {
         if ( team[winTeam][STREAK] >= cvar_BalanceAfterStreak.IntValue ) {
             /* we hit a streak */
-            if ( (team[winTeam][KILLS] / team[loserTeam][KILLS]) >= 2 ) {
+            if ( (team[loserTeam][KILLS] * 2) < team[winTeam][KILLS] ) {
                 PrintToConsoleAll ( "shouldBalance:true -> %d / %d >= 2", team[winTeam][KILLS], team[loserTeam][KILLS] );
                 return true;
             } else {
