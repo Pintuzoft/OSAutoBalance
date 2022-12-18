@@ -7,9 +7,9 @@ static const int WINS = 1;
 static const int STREAK = 2;
 static const int KILLS = 3;
 static const int SIZE = 4;
-static const int BEST = 5;
+static const int FIRST = 5;
 static const int SECOND = 6;
-static const int WORST = 7;
+static const int LAST = 7;
 
 static const int NUMTEAMVALUES = 8;
 int team[4][8];
@@ -46,11 +46,13 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
     
     /* BALANCE */
     if ( shouldBalance ( winTeam, loserTeam ) ) {
+        shieldAllPlayers ( );
         swapPlayersOnStreak ( winTeam, loserTeam );
         
     } else if ( moreTerrorists ( ) ) {
-        if ( team[CS_TEAM_T][WORST] > 0 ) {
-            swapPlayer ( team[CS_TEAM_T][WORST] );
+        shieldAllPlayers ( );
+        if ( team[CS_TEAM_T][LAST] > 0 ) {
+            swapPlayer ( team[CS_TEAM_T][LAST] );
         } else {
             moveRandomTerrorist (  );
         }
@@ -72,7 +74,7 @@ public void moveRandomTerrorist ( ) {
     for ( int player = 1; player <= MaxClients; player++ ) {
         if ( playerIsReal ( player ) && GetClientTeam(player) == CS_TEAM_T ) {
             --random;
-            if ( random <= 1 ) {
+            if ( random < 1 ) {
                 swapPlayer ( player );
                 return;
             }
@@ -107,6 +109,14 @@ public void unShieldAllPlayers ( ) {
         }
     }
 }
+ /* unshield all players */
+public void shieldAllPlayers ( ) {
+    for ( int player = 1; player <= MaxClients; player++ ) {
+        if ( IsClientInGame ( player ) && IsPlayerAlive ( player ) && ! IsClientSourceTV ( player ) ) {
+            shieldPlayer ( player );
+        }
+    }
+}
  
 /* shield off */
 public void shieldPlayer ( int player ) {
@@ -134,20 +144,34 @@ public bool shouldBalance ( winTeam, loserTeam ) {
 
 /* swap players when we hit a streak */
 public void swapPlayersOnStreak ( int winTeam, int loserTeam ) {
+    if ( terroristsWon ( ) ) {
+        /* T WON */
+
+    } else {
+        /* CT WON */
+        if ( team[CS_TEAM_T][LAST] > 0 ) {
+            swapPlayer ( team[CS_TEAM_T][LAST] );
+        }
+    }
+
+
+
+
+
     if ( moreTerrorists ( ) ) {
-        if ( team[CS_TEAM_T][WORST] < 0 ) {
+        if ( team[CS_TEAM_T][LAST] < 0 ) {
             moveRandomTerrorist (  );
         } else if ( terroristsWon ( ) ) {
-            swapPlayer ( team[CS_TEAM_T][WORST] );
+            swapPlayer ( team[CS_TEAM_T][LAST] );
         } else {
-            swapPlayer ( team[CS_TEAM_CT][BEST] );
+            swapPlayer ( team[CS_TEAM_CT][FIRST] );
             swapPlayer ( team[CS_TEAM_T][SECOND] );
-            swapPlayer ( team[CS_TEAM_T][WORST] );
+            swapPlayer ( team[CS_TEAM_T][LAST] );
         }
        
     } else {
         swapPlayer ( team[winTeam][SECOND] );
-        swapPlayer ( team[loserTeam][WORST] );
+        swapPlayer ( team[loserTeam][LAST] );
     }
 }
 
@@ -166,48 +190,102 @@ public int getOtherTeam ( int winTeam ) {
     return ( winTeam == 2 ? 3 : 2 );
 }
 public void gatherTeamsData ( int winTeam, loserTeam ) {
-    int playerTeam;
     resetTeams ( );
     setWinsAndStreak ( winTeam );
-    char name[64];
       
     team[CS_TEAM_T][SIZE] = GetTeamClientCount ( CS_TEAM_T );
     team[CS_TEAM_T][KILLS] = GetTeamScore ( CS_TEAM_T );
     team[CS_TEAM_CT][SIZE] = GetTeamClientCount ( CS_TEAM_CT );
     team[CS_TEAM_CT][KILLS] = GetTeamScore ( CS_TEAM_CT );
 
-    /* loop players to set positions */
+    team[CS_TEAM_T][FIRST] = getBestPlayerInTeam ( CS_TEAM_T, 0 );
+    team[CS_TEAM_CT][FIRST] = getBestPlayerInTeam ( CS_TEAM_CT, 0 );
+    team[CS_TEAM_T][SECOND] = getBestPlayerInTeam ( CS_TEAM_T, team[CS_TEAM_T][FIRST] );
+    team[CS_TEAM_CT][SECOND] = getBestPlayerInTeam ( CS_TEAM_CT, team[CS_TEAM_CT][FIRST] );
+    team[CS_TEAM_T][LAST] = getWorstPlayerInTeam ( CS_TEAM_T, 0 );
+    team[CS_TEAM_CT][LAST] = getWorstPlayerInTeam ( CS_TEAM_CT, 0 );
+}
+
+/* get best player */
+public int getBestPlayerInTeam ( int inTeam, int exclude ) {
+    int found = -1;
     for ( int player = 1; player <= MaxClients; player++ ) {
-        if ( playerIsReal ( player ) ) {
-            playerTeam = GetClientTeam(player);
-            GetClientName ( player, name, 64 );
-            int position = getScoreBoardPosition ( player );
-            if ( position == 1 ) {
-                team[playerTeam][BEST] = player;
-            } else if ( position == 2 ) {
-                team[playerTeam][SECOND] = player;
-            } else if ( position == team[playerTeam][SIZE] ) {
-                team[playerTeam][WORST] = player;
+        if ( playerIsReal ( player ) && 
+             player != exclude && 
+             GetClientTeam ( player ) == inTeam ) {
+            if ( found < 0 ) {
+                /* we found the best one so far */
+                found = player;
+            } else if ( playerIsBetter ( found, player ) ) {
+                /* we found one better */
+                found = player;
             }
         }
     }
+    return found;
 }
 
-/* get player position in the scoreboard */
-public int getScoreBoardPosition ( int player ) {
-    int score = CS_GetClientContributionScore ( player );
-    int clientTeam = GetClientTeam ( player );
-    int position = 1;
-    for ( int other = 1; other <= MaxClients; other++ ) {
-        if ( playerIsReal ( other ) && 
-             GetClientTeam ( other ) == clientTeam &&
-             CS_GetClientContributionScore ( other ) >= score ) {
-                ++position;
+/* get worst player */
+public int getWorstPlayerInTeam ( int inTeam, int exclude ) {
+    int found = -1;
+    for ( int player = 1; player <= MaxClients; player++ ) {
+        if ( playerIsReal ( player ) && 
+             player != exclude && 
+             GetClientTeam ( player ) == inTeam ) {
+            if ( found < 0 ) {
+                /* we found the worst one so far */
+                found = player;
+            } else if ( ! playerIsBetter ( found, player ) ) {
+                /* we found one better */
+                found = player;
+            }
         }
     }
-    return position;
+    return found;
 }
 
+public bool playerIsBetter ( int p1, int p2 ) {
+    int score1 = CS_GetClientContributionScore ( p1 );
+    int score2 = CS_GetClientContributionScore ( p2 );
+    int frags1 = GetClientFrags ( p1 );
+    int frags2 = GetClientFrags ( p2 );
+    int assists1 = CS_GetClientAssists ( p1 );
+    int assists2 = CS_GetClientAssists ( p2 );
+    int deaths1 = GetClientDeaths ( p1 );
+    int deaths2 = GetClientDeaths ( p2 );
+    
+    /* CHEAK SCORE */
+    if ( score2 > score1 ) {
+        return true;
+    } else if ( score1 > score2 ) {
+        return false;
+    } 
+    
+    /* CHECK FRAGS */
+    if ( frags2 > frags1 ) {
+        return true;
+    } else if ( frags1 > frags2 ) {
+        return false;
+    } 
+    
+    /* CHECK DEATHS */
+    if ( deaths2 < deaths1 ) {
+        return true;
+    } else if ( deaths1 < deaths2 ) {
+        return false;
+    } 
+    
+    /* CHECK ASSISTS */
+    if ( assists2 > assists1 ) {
+        return true;
+    } else if ( assists1 > assists2 ) {
+        return false;
+    } 
+    
+    /* everything is the same so we return false */
+    return false;
+}
+ 
 /* return true if players team won the round */
 public bool playerWon ( int player ) {
     return (team[GetClientTeam(player)][WINNER] == 1);
@@ -227,15 +305,15 @@ public void resetTeams ( ) {
     team[CS_TEAM_T][WINNER] = 0;
     team[CS_TEAM_T][KILLS] = 0;
     team[CS_TEAM_T][SIZE] = 0;
-    team[CS_TEAM_T][BEST] = -1;
+    team[CS_TEAM_T][FIRST] = -1;
     team[CS_TEAM_T][SECOND] = -1;
-    team[CS_TEAM_T][WORST] = -1;
+    team[CS_TEAM_T][LAST] = -1;
     team[CS_TEAM_CT][WINNER] = 0;
     team[CS_TEAM_CT][KILLS] = 0;
     team[CS_TEAM_CT][SIZE] = 0;
-    team[CS_TEAM_CT][BEST] = -1;
+    team[CS_TEAM_CT][FIRST] = -1;
     team[CS_TEAM_CT][SECOND] = -1;
-    team[CS_TEAM_CT][WORST] = -1;
+    team[CS_TEAM_CT][LAST] = -1;
 }
 
 
