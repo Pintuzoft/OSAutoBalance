@@ -147,14 +147,8 @@ public bool shouldBalance ( winTeam, loserTeam ) {
 public void swapPlayersOnStreak ( ) {
     /* TERRORISTS IS MORE */
     if ( moreTerrorists ( ) ) {
-        if ( terroristsWon ( ) ) {
-            swapPlayer ( team[CS_TEAM_T][LAST] );
-        } else {
-            swapPlayer ( team[CS_TEAM_CT][SECOND] );
-            swapPlayer ( team[CS_TEAM_T][SECOND] );
-            swapPlayer ( team[CS_TEAM_T][LAST] );
-        }
-
+        swapPlayer ( team[CS_TEAM_T][LAST] );
+        
     /* COUNTER-TERRORISTS IS SAME OR MORE */
     } else {
         if ( terroristsWon ( ) ) {
