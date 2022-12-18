@@ -201,9 +201,9 @@ public void gatherTeamsData ( int winTeam, loserTeam ) {
     setWinsAndStreak ( winTeam );
       
     team[CS_TEAM_T][SIZE] = GetTeamClientCount ( CS_TEAM_T );
-    team[CS_TEAM_T][KILLS] = GetTeamScore ( CS_TEAM_T );
     team[CS_TEAM_CT][SIZE] = GetTeamClientCount ( CS_TEAM_CT );
-    team[CS_TEAM_CT][KILLS] = GetTeamScore ( CS_TEAM_CT );
+
+    getTeamPlayerStats ( );
 
     team[CS_TEAM_T][FIRST] = getBestPlayerInTeam ( CS_TEAM_T, 0 );
     team[CS_TEAM_CT][FIRST] = getBestPlayerInTeam ( CS_TEAM_CT, 0 );
@@ -211,6 +211,17 @@ public void gatherTeamsData ( int winTeam, loserTeam ) {
     team[CS_TEAM_CT][SECOND] = getBestPlayerInTeam ( CS_TEAM_CT, team[CS_TEAM_CT][FIRST] );
     team[CS_TEAM_T][LAST] = getWorstPlayerInTeam ( CS_TEAM_T, 0 );
     team[CS_TEAM_CT][LAST] = getWorstPlayerInTeam ( CS_TEAM_CT, 0 );
+}
+
+/* get player stats */
+public void getTeamPlayerStats ( ) {
+    int pTeam;
+    for ( int player = 1; player <= MaxClients; player++ ) {
+        if ( playerIsReal ( player ) ) {
+            pTeam = GetClientTeam ( player );
+            team[pTeam][KILLS] += GetClientFrags ( player );
+        }
+    }
 }
 
 /* get best player */
