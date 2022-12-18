@@ -139,18 +139,28 @@ public void unShieldPlayer ( int player ) {
 
 /* return true if we should balance the teams */
 public bool shouldBalance ( winTeam, loserTeam ) {
+    PrintToConsoleAll ( "=============================" );
+    PrintToConsoleAll ( "0:" );
+
     if ( GetClientCount(true) >= 6 ) {
+    PrintToConsoleAll ( "1:" );
         if ( team[winTeam][STREAK] >= cvar_BalanceAfterStreak.IntValue ) {
+    PrintToConsoleAll ( "2:" );
             /* we hit a streak */
             if ( (team[loserTeam][KILLS] * 2) < team[winTeam][KILLS] ) {
+    PrintToConsoleAll ( "3:" );
                 PrintToConsoleAll ( "shouldBalance:true -> %d / %d >= 2", team[winTeam][KILLS], team[loserTeam][KILLS] );
                 return true;
             } else {
+    PrintToConsoleAll ( "4:" );
                 PrintToConsoleAll ( "shouldBalance:false -> %d / %d < 2", team[winTeam][KILLS], team[loserTeam][KILLS] );
             }
+    PrintToConsoleAll ( "5:" );
             
         }  
+    PrintToConsoleAll ( "6:" );
     }
+    PrintToConsoleAll ( "7:" );
     return false;
 }
 
