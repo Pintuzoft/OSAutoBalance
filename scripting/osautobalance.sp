@@ -47,7 +47,8 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
     /* BALANCE */
     if ( shouldBalance ( winTeam, loserTeam ) ) {
         shieldAllPlayers ( );
-        swapPlayersOnStreak ( winTeam, loserTeam );
+        swapPlayersOnStreak ( );
+        team[winTeam][STREAK] = 0;
         
     } else if ( moreTerrorists ( ) ) {
         shieldAllPlayers ( );
@@ -143,35 +144,26 @@ public bool shouldBalance ( winTeam, loserTeam ) {
 }
 
 /* swap players when we hit a streak */
-public void swapPlayersOnStreak ( int winTeam, int loserTeam ) {
-    if ( terroristsWon ( ) ) {
-        /* T WON */
-
-    } else {
-        /* CT WON */
-        if ( team[CS_TEAM_T][LAST] > 0 ) {
-            swapPlayer ( team[CS_TEAM_T][LAST] );
-        }
-    }
-
-
-
-
-
+public void swapPlayersOnStreak ( ) {
+    /* TERRORISTS IS MORE */
     if ( moreTerrorists ( ) ) {
-        if ( team[CS_TEAM_T][LAST] < 0 ) {
-            moveRandomTerrorist (  );
-        } else if ( terroristsWon ( ) ) {
+        if ( terroristsWon ( ) ) {
             swapPlayer ( team[CS_TEAM_T][LAST] );
         } else {
-            swapPlayer ( team[CS_TEAM_CT][FIRST] );
+            swapPlayer ( team[CS_TEAM_CT][SECOND] );
             swapPlayer ( team[CS_TEAM_T][SECOND] );
             swapPlayer ( team[CS_TEAM_T][LAST] );
         }
-       
+
+    /* COUNTER-TERRORISTS IS SAME OR MORE */
     } else {
-        swapPlayer ( team[winTeam][SECOND] );
-        swapPlayer ( team[loserTeam][LAST] );
+        if ( terroristsWon ( ) ) {
+            swapPlayer ( team[CS_TEAM_T][SECOND] );
+            swapPlayer ( team[CS_TEAM_CT][LAST] );
+        } else {
+            swapPlayer ( team[CS_TEAM_CT][SECOND] );
+            swapPlayer ( team[CS_TEAM_T][LAST] );
+        }
     }
 }
 
