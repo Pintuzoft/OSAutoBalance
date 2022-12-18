@@ -139,8 +139,15 @@ public void unShieldPlayer ( int player ) {
 
 /* return true if we should balance the teams */
 public bool shouldBalance ( winTeam, loserTeam ) {
-    return ( team[winTeam][STREAK] >= cvar_BalanceAfterStreak.IntValue && 
-             GetClientCount(true) >= 6 );
+    if ( GetClientCount(true) >= 6 ) {
+        if ( team[winTeam][STREAK] >= cvar_BalanceAfterStreak.IntValue ) {
+            /* we hit a streak */
+            if ( ( team[winTeam][KILLS] / team[loserTeam][KILLS] ) >= 2 ) {
+                return true;
+            }
+        }  
+    }
+    return false;
 }
 
 /* swap players when we hit a streak */
