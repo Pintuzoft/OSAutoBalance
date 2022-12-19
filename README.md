@@ -10,7 +10,7 @@ De två bästa spelarna blir således lagkaptener för sina lag, och om de två 
 Standardinställningen är att göra en bedömning av lagbalansen varje gång ett lag har vunnit 3 omgångar i rad.
 Om det spelare i det vinnande laget har en frag-summa vilken överstiger 1.8 gånger det andra lagets, kommer en balans att göras, det vill säga den näst bästa spelaren i det vinnande laget kommer att byta med den sista spelaren i det förlorande laget.
 
-Eftersom pluginnet kommer bedöma lagets skicklighet genom att använda antalet kills med 1.8-ratio kommer vi att få fler byten i början av kartan än i slutet av kartan eftersom antalet kill kommer att jämnas ut med tiden och de ganska bra spelarna kommer att byta lag i de första omgångarna.
+Eftersom pluginnet kommer bedöma lagets skicklighet genom att använda antalet kills med 1.8-ratio kommer vi att få fler byten i början av kartan än i slutet av kartan eftersom antalet kills kommer att jämnas ut med tiden och de ganska bra spelarna kommer att byta lag i de första omgångarna.
 
 Pluginet vet också om halvtid så det kommer att hålla reda på antal vinster och streaks korrekt efter en halvtid.
 
