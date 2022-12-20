@@ -15,6 +15,7 @@ static const int NUMTEAMVALUES = 8;
 int team[4][8];
 
 ConVar cvar_BalanceAfterStreak;
+ConVar cvar_BalanceRatio;
 
 public Plugin myinfo = {
 	name = "OSAutoBalance",
@@ -26,6 +27,7 @@ public Plugin myinfo = {
  
 public void OnPluginStart ( ) {
     cvar_BalanceAfterStreak = CreateConVar ( "os_balanceafterstreak", "3", "Balance teams after X streak", _, true, 1.0 );
+    cvar_BalanceRatio = CreateConVar ( "os_balanceRatio", "16", "Balance teams if kill ratio is larger than 1.6x", _, true, 1.0 );
     HookEvent ( "round_start", Event_RoundStart );
     HookEvent ( "round_end", Event_RoundEnd );
     HookEvent ( "announce_phase_end", Event_HalfTime );
@@ -141,7 +143,7 @@ public bool shouldBalance ( winTeam, loserTeam ) {
     if ( GetClientCount(true) >= 6 ) {
         if ( team[winTeam][STREAK] >= cvar_BalanceAfterStreak.IntValue ) {
             /* we hit a streak */
-            if ( (team[loserTeam][KILLS] * 18) < (team[winTeam][KILLS] * 10) ) {
+            if ( (team[loserTeam][KILLS] * cvar_BalanceRatio.IntValue ) < (team[winTeam][KILLS] * 10) ) {
                 return true;
             }
         }  
