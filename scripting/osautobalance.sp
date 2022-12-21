@@ -27,7 +27,7 @@ public Plugin myinfo = {
  
 public void OnPluginStart ( ) {
     cvar_BalanceAfterStreak = CreateConVar ( "os_balanceafterstreak", "3", "Balance teams after X streak", _, true, 1.0 );
-    cvar_BalanceRatio = CreateConVar ( "os_balanceRatio", "16", "Balance teams if kill ratio is larger than 1.6x", _, true, 1.0 );
+    cvar_BalanceRatio = CreateConVar ( "os_balanceratio", "16", "Balance teams if kill ratio is larger than 1.6x", _, true, 1.0 );
     HookEvent ( "round_start", Event_RoundStart );
     HookEvent ( "round_end", Event_RoundEnd );
     HookEvent ( "announce_phase_end", Event_HalfTime );
@@ -46,19 +46,19 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
     /* GATHER DATA */
     gatherTeamsData ( winTeam, loserTeam );
     
-    /* BALANCE */
-    if ( shouldBalance ( winTeam, loserTeam ) ) {
-        shieldAllPlayers ( );
-        swapPlayersOnStreak ( );
-        team[winTeam][STREAK] = 0;
-        
-    } else if ( moreTerrorists ( ) ) {
+    /* BALANCE */        
+    if ( shouldEvenOddTeamsOut ( ) ) {
         shieldAllPlayers ( );
         if ( team[CS_TEAM_T][LAST] > 0 ) {
             swapPlayer ( team[CS_TEAM_T][LAST] );
         } else {
             moveRandomTerrorist (  );
         }
+          
+    } else if ( shouldBalance ( winTeam, loserTeam ) ) {
+        shieldAllPlayers ( );
+        swapPlayersOnStreak ( );
+        team[winTeam][STREAK] = 0;
     }
 }
 public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast ) {
@@ -71,6 +71,17 @@ public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast 
 }
 
 /*** METHODS ***/
+
+public bool shouldEvenOddTeamsOut ( ) {
+    if ( moreTerrorists ( ) ) {
+        if ( highSinglePlayerValue ( ) ) {
+            if ( terroristsWon ( ) ) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
 public void moveRandomTerrorist ( ) {
     int random = GetRandomInt ( 0, team[CS_TEAM_T][SIZE] );
@@ -142,8 +153,7 @@ public void unShieldPlayer ( int player ) {
 public bool shouldBalance ( winTeam, loserTeam ) {
     if ( GetClientCount(true) >= 6 ) {
         if ( team[winTeam][STREAK] >= cvar_BalanceAfterStreak.IntValue ) {
-            /* we hit a streak */
-            if ( (team[loserTeam][KILLS] * cvar_BalanceRatio.IntValue ) < (team[winTeam][KILLS] * 10) ) {
+            if ( isTeamOverRatio ( winTeam, loserTeam ) ) {
                 return true;
             }
         }  
@@ -151,21 +161,47 @@ public bool shouldBalance ( winTeam, loserTeam ) {
     return false;
 }
 
+/* check team ratio */
+public bool isTeamOverRatio ( int winTeam, int loserTeam ) {
+    if ( ( team[loserTeam][KILLS] * cvar_BalanceRatio.IntValue ) < (team[winTeam][KILLS] * 10 ) ) {
+        return true;
+    }
+    return false;
+}
+
+/* check if first team has higher frag count than the other */
+public bool isTeamRatedHigher ( int firstTeam, int secondTeam ) {
+    if ( team[firstTeam][KILLS] > team[secondTeam][KILLS] ) {
+        return true;
+    }
+    return false;
+}
+
+/* return true if a single player is valued high, i.e there is fewer players */
+public bool highSinglePlayerValue ( ) {
+    if ( ( team[CS_TEAM_T][SIZE] + team[CS_TEAM_CT][SIZE] ) < 12 ) {
+        return true;
+    }
+    return false;
+}
+
+
 /* swap players when we hit a streak */
 public void swapPlayersOnStreak ( ) {
-    /* TERRORISTS IS MORE */
-    if ( moreTerrorists ( ) ) {
-        swapPlayer ( team[CS_TEAM_T][LAST] );
-        
-    /* COUNTER-TERRORISTS IS SAME OR MORE */
-    } else {
-        if ( terroristsWon ( ) ) {
+    /* TERRORISTS WON */
+    if ( terroristsWon ( ) ) {
+        if ( moreTerrorists ( ) && highSinglePlayerValue ( ) ) {
+            swapPlayer ( team[CS_TEAM_T][LAST] );
+           
+        } else {
             swapPlayer ( team[CS_TEAM_T][SECOND] );
             swapPlayer ( team[CS_TEAM_CT][LAST] );
-        } else {
-            swapPlayer ( team[CS_TEAM_CT][SECOND] );
-            swapPlayer ( team[CS_TEAM_T][LAST] );
         }
+    
+    /* COUNTER TERRORISTS WON*/
+    } else {
+        swapPlayer ( team[CS_TEAM_CT][SECOND] );
+        swapPlayer ( team[CS_TEAM_T][LAST] );
     }
 }
 
@@ -259,7 +295,7 @@ public bool playerIsBetter ( int p1, int p2 ) {
     int deaths1 = GetClientDeaths ( p1 );
     int deaths2 = GetClientDeaths ( p2 );
     
-    /* CHEAK SCORE */
+    /* CHECK SCORE */
     if ( score2 > score1 ) {
         return true;
     } else if ( score1 > score2 ) {
