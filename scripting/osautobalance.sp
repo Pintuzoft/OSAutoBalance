@@ -27,7 +27,7 @@ public Plugin myinfo = {
  
 public void OnPluginStart ( ) {
     cvar_BalanceAfterStreak = CreateConVar ( "os_balanceafterstreak", "3", "Balance teams after X streak", _, true, 1.0 );
-    cvar_BalanceRatio = CreateConVar ( "os_balanceratio", "16", "Balance teams if kill ratio is larger than 1.6x", _, true, 1.0 );
+    cvar_BalanceRatio = CreateConVar ( "os_balanceratio", "15", "Balance teams if kill ratio is larger than 1.5x", _, true, 1.0 );
     HookEvent ( "round_start", Event_RoundStart );
     HookEvent ( "round_end", Event_RoundEnd );
     HookEvent ( "announce_phase_end", Event_HalfTime );
@@ -41,11 +41,28 @@ public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcas
 }
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
     int winTeam = GetEventInt(event, "winner");
-    int loserTeam = getOtherTeam ( winTeam );
+    CreateTimer ( 0.1, handleRoundEnd, winTeam );
 
+}
+public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast ) {
+    int buf;
+    for ( int val = 0; val < NUMTEAMVALUES; val++ ) {
+        buf = team[CS_TEAM_T][val];
+        team[CS_TEAM_T][val] = team[CS_TEAM_CT][val];
+        team[CS_TEAM_CT][val] = buf;
+    }
+}
+
+/*** METHODS ***/
+
+public Action handleRoundEnd ( Handle timer, int winTeam ) {
+    int loserTeam = getOtherTeam ( winTeam );
+    resetTeams ( );
+    setWinsAndStreak ( winTeam );
+      
     /* GATHER DATA */
     gatherTeamsData ( winTeam, loserTeam );
-    
+
     /* BALANCE */        
     if ( shouldEvenOddTeamsOut ( ) ) {
         shieldAllPlayers ( );
@@ -60,17 +77,8 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
         swapPlayersOnStreak ( );
         team[winTeam][STREAK] = 0;
     }
+    return Plugin_Handled;
 }
-public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast ) {
-    int buf;
-    for ( int val = 0; val < NUMTEAMVALUES; val++ ) {
-        buf = team[CS_TEAM_T][val];
-        team[CS_TEAM_T][val] = team[CS_TEAM_CT][val];
-        team[CS_TEAM_CT][val] = buf;
-    }
-}
-
-/*** METHODS ***/
 
 public bool shouldEvenOddTeamsOut ( ) {
     if ( moreTerrorists ( ) ) {
@@ -220,9 +228,7 @@ public int getOtherTeam ( int winTeam ) {
     return ( winTeam == 2 ? 3 : 2 );
 }
 public void gatherTeamsData ( int winTeam, loserTeam ) {
-    resetTeams ( );
-    setWinsAndStreak ( winTeam );
-      
+    
     team[CS_TEAM_T][SIZE] = GetTeamClientCount ( CS_TEAM_T );
     team[CS_TEAM_CT][SIZE] = GetTeamClientCount ( CS_TEAM_CT );
 
