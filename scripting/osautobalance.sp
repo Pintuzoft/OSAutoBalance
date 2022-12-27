@@ -79,12 +79,14 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
     }
     return Plugin_Handled;
 }
-
+ 
 public bool shouldEvenOddTeamsOut ( ) {
     if ( moreTerrorists ( ) ) {
         if ( highSinglePlayerValue ( ) ) {
             if ( terroristsWon ( ) ) {
-                return true;
+                if ( (GetTeamScore(CS_TEAM_CT)-GetTeamScore(CS_TEAM_T)) < 3 ) {
+                    return true;
+                }
             }
         }
     }
