@@ -13,6 +13,7 @@ static const int LAST = 7;
 
 static const int NUMTEAMVALUES = 8;
 int team[4][8];
+int bombSites = 0;
 
 ConVar cvar_BalanceAfterStreak;
 ConVar cvar_BalanceRatio;
@@ -33,7 +34,14 @@ public void OnPluginStart ( ) {
     HookEvent ( "announce_phase_end", Event_HalfTime );
     AutoExecConfig ( true, "osautobalance" );
 }
- 
+
+/* on map start count how many bomb spots there are */
+
+public void OnMapStart ( ) {
+    countBombSites ( );
+    PrintToChatAll ( " \x02[OSAutoBalance]: \x07There are %d bomb sites on this map.", bombSites );
+}
+
 
 /*** EVENTS ***/
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
@@ -385,4 +393,11 @@ public void zerofy ( ) {
     team[CS_TEAM_CT][KILLS] = 0;
     team[CS_TEAM_CT][SIZE] = 0;
 }
-  
+
+public void countBombSites ( ) {
+    bombSites = 0;
+    int entity = 0;
+    while ( ( entity = FindEntityByClassname ( entity, "func_bomb_target" ) ) != INVALID_ENT_REFERENCE ) {
+        bombSites++;
+    }
+}
