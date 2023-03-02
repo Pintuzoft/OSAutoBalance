@@ -35,16 +35,10 @@ public void OnPluginStart ( ) {
     AutoExecConfig ( true, "osautobalance" );
 }
 
-/* on map start count how many bomb spots there are */
-
-public void OnMapStart ( ) {
-    countBombSites ( );
-    PrintToChatAll ( " \x02[OSAutoBalance]: \x07There are %d bomb sites on this map.", bombSites );
-}
-
-
 /*** EVENTS ***/
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
+    countBombSites ( );
+    PrintToChatAll ( " \x02[OSAutoBalance]: \x07There are %d bomb sites on this map.", bombSites );
     unShieldAllPlayers ( );
 }
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
