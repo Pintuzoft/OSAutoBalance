@@ -14,6 +14,7 @@ static const int LAST = 7;
 static const int NUMTEAMVALUES = 8;
 int team[4][8];
 int bombSites = 0;
+int teamWeight = CS_TEAM_CT;
 
 ConVar cvar_BalanceAfterStreak;
 ConVar cvar_BalanceRatio;
@@ -37,8 +38,7 @@ public void OnPluginStart ( ) {
 
 /*** EVENTS ***/
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
-    countBombSites ( );
-    PrintToChatAll ( " \x02[OSAutoBalance]: \x07There are %d bomb sites on this map.", bombSites );
+    setTeamWeight ( );
     unShieldAllPlayers ( );
 }
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
@@ -68,12 +68,20 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
     /* BALANCE */        
     if ( shouldEvenOddTeamsOut ( ) ) {
         shieldAllPlayers ( );
-        if ( team[CS_TEAM_T][LAST] > 0 ) {
-            swapPlayer ( team[CS_TEAM_T][LAST] );
-        } else {
-            moveRandomTerrorist (  );
+        if ( teamWeight == CS_TEAM_CT && moreTerrorists ( ) ) {
+            if ( team[CS_TEAM_T][LAST] > 0 ) {
+                swapPlayer ( team[CS_TEAM_T][LAST] );
+            } else {
+                moveRandomTerrorist (  );
+            }
+        } else if ( teamWeight == CS_TEAM_T && moreCounterTerrorists ( ) ) {
+            if ( team[CS_TEAM_CT][LAST] > 0 ) {
+                swapPlayer ( team[CS_TEAM_CT][LAST] );
+            } else {
+                moveRandomCounterTerrorist (  );
+            }
         }
-          
+
     } else if ( shouldBalance ( winTeam, loserTeam ) ) {
         shieldAllPlayers ( );
         swapPlayersOnStreak ( );
@@ -83,10 +91,18 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
 }
  
 public bool shouldEvenOddTeamsOut ( ) {
-    if ( moreTerrorists ( ) ) {
+    if ( teamWeight == CS_TEAM_CT && moreTerrorists ( ) ) {
         if ( highSinglePlayerValue ( ) ) {
             if ( terroristsWon ( ) ) {
                 if ( (GetTeamScore(CS_TEAM_CT)-GetTeamScore(CS_TEAM_T)) < 3 ) {
+                    return true;
+                }
+            }
+        }
+    } else if ( teamWeight == CS_TEAM_CT && moreCounterTerrorists ( ) ) {
+        if ( highSinglePlayerValue ( ) ) {
+            if ( counterTerroristsWon ( ) ) {
+                if ( (GetTeamScore(CS_TEAM_T)-GetTeamScore(CS_TEAM_CT)) < 3 ) {
                     return true;
                 }
             }
@@ -99,6 +115,18 @@ public void moveRandomTerrorist ( ) {
     int random = GetRandomInt ( 0, team[CS_TEAM_T][SIZE] );
     for ( int player = 1; player <= MaxClients; player++ ) {
         if ( playerIsReal ( player ) && GetClientTeam(player) == CS_TEAM_T ) {
+            --random;
+            if ( random < 1 ) {
+                swapPlayer ( player );
+                return;
+            }
+        }
+    }
+}
+public void moveRandomCounterTerrorist ( ) {
+    int random = GetRandomInt ( 0, team[CS_TEAM_CT][SIZE] );
+    for ( int player = 1; player <= MaxClients; player++ ) {
+        if ( playerIsReal ( player ) && GetClientTeam(player) == CS_TEAM_CT ) {
             --random;
             if ( random < 1 ) {
                 swapPlayer ( player );
@@ -202,16 +230,19 @@ public bool highSinglePlayerValue ( ) {
 public void swapPlayersOnStreak ( ) {
     /* TERRORISTS WON */
     if ( terroristsWon ( ) ) {
+        /* IF MORE TERRORISTS */
         if ( moreTerrorists ( ) && highSinglePlayerValue ( ) ) {
             swapPlayer ( team[CS_TEAM_T][LAST] );
            
+        /* IF EQUAL TEAMS OR CT IS MORE */
         } else {
             swapPlayer ( team[CS_TEAM_T][SECOND] );
             swapPlayer ( team[CS_TEAM_CT][LAST] );
         }
     
-    /* COUNTER TERRORISTS WON*/
+    /* COUNTER TERRORISTS WON */
     } else {
+        if ( ! moreTerrorists ( ) )
         swapPlayer ( team[CS_TEAM_CT][SECOND] );
         swapPlayer ( team[CS_TEAM_T][LAST] );
     }
@@ -221,18 +252,26 @@ public void swapPlayersOnStreak ( ) {
 public bool terroristsWon ( ) {
     return ( team[CS_TEAM_T][WINNER] == 1 );
 }
+/* return true if counter-terrorists won the round */
+public bool counterTerroristsWon ( ) {
+    return ( team[CS_TEAM_CT][WINNER] == 1 );
+}
 
 /* return true if there is more terrorists than counter-terrorists*/
 public bool moreTerrorists ( ) {
     return ( team[CS_TEAM_T][SIZE] > team[CS_TEAM_CT][SIZE] );
+}
+/* return true if there is more counter-terrorists than terrorists*/
+public bool moreCounterTerrorists ( ) {
+    return ( team[CS_TEAM_CT][SIZE] > team[CS_TEAM_T][SIZE] );
 }
 
 /* returns the id of the other team */
 public int getOtherTeam ( int winTeam ) {
     return ( winTeam == 2 ? 3 : 2 );
 }
+
 public void gatherTeamsData ( int winTeam, loserTeam ) {
-    
     team[CS_TEAM_T][SIZE] = GetTeamClientCount ( CS_TEAM_T );
     team[CS_TEAM_CT][SIZE] = GetTeamClientCount ( CS_TEAM_CT );
 
@@ -388,10 +427,26 @@ public void zerofy ( ) {
     team[CS_TEAM_CT][SIZE] = 0;
 }
 
-public void countBombSites ( ) {
+public void setTeamWeight ( ) {
     bombSites = 0;
     int entity = 0;
     while ( ( entity = FindEntityByClassname ( entity, "func_bomb_target" ) ) != INVALID_ENT_REFERENCE ) {
         bombSites++;
+    }
+    /* IsHostageMap */
+    if ( bombSites == 0 ) {
+        teamWeight = CS_TEAM_CT;
+
+    /* hasOneBombSite */
+    } else if ( bombSites == 1 ) {
+        teamWeight = CS_TEAM_T;
+    
+    /* hasTwoBombSites */
+    } else if ( bombSites == 2 ) {
+        teamWeight = CS_TEAM_CT;
+ 
+    /* hasThreeBombSites+ */
+    } else {
+        teamWeight = CS_TEAM_CT;
     }
 }
