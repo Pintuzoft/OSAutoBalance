@@ -99,7 +99,7 @@ public bool shouldEvenOddTeamsOut ( ) {
                 }
             }
         }
-    } else if ( teamWeight == CS_TEAM_CT && moreCounterTerrorists ( ) ) {
+    } else if ( teamWeight == CS_TEAM_T && moreCounterTerrorists ( ) ) {
         if ( highSinglePlayerValue ( ) ) {
             if ( counterTerroristsWon ( ) ) {
                 if ( (GetTeamScore(CS_TEAM_T)-GetTeamScore(CS_TEAM_CT)) < 3 ) {
