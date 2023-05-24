@@ -43,7 +43,7 @@ public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcas
 }
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
     int winTeam = GetEventInt(event, "winner");
-    CreateTimer ( 4.0, handleRoundEnd, winTeam );
+    CreateTimer ( 5.5, handleRoundEnd, winTeam );
 
 }
 public void Event_HalfTime ( Event event, const char[] name, bool dontBroadcast ) {
