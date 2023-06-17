@@ -21,13 +21,13 @@ public Plugin myinfo = {
 	url = "https://github.com/Pintuzoft/OSAutoBalance"
 }
  
-public OnPluginStart ( ) {
+public void OnPluginStart ( ) {
     HookEvent ( "round_start", Event_RoundStart );
     HookEvent ( "round_end", Event_RoundEnd );
     //HookEvent ( "announce_phase_end", Event_HalfTime );
 }
 
-public OnMapStart ( ) {
+public void OnMapStart ( ) {
     setTeamWeight ( );
 }
 
