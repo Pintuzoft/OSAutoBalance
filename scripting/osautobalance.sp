@@ -107,7 +107,7 @@ public void fetchTeamData ( ) {
     for ( int i = 0; i < MAXPLAYERS; i++ ) {
         if ( IsValidPlayer(i) ) {
             int team = GetClientTeam ( i );
-            GetClientAuthId(i, AuthId_Steam2, tmpSteamid, sizeof(tmpSteamid));
+            GetClientAuthId(i, AuthId_Engine, tmpSteamid, sizeof(tmpSteamid));
             PrintToConsoleAll ( "OSAutoBalance: Steamid: %s", tmpSteamid );
             if ( team == CS_TEAM_CT ) {
                 ctSize++;
