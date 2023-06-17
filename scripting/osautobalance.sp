@@ -108,6 +108,7 @@ public void fetchTeamData ( ) {
         if ( IsValidPlayer(i) ) {
             int team = GetClientTeam ( i );
             GetClientAuthId(i, AuthId_Steam3, tmpSteamid, sizeof(tmpSteamid));
+            PrintToConsoleAll ( "OSAutoBalance: Steamid: %s", tmpSteamid );
             if ( team == CS_TEAM_CT ) {
                 ctSize++;
                 ctKD += GetClientKDRatio ( i );
