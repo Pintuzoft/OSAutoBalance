@@ -27,10 +27,6 @@ public void OnPluginStart ( ) {
     //HookEvent ( "announce_phase_end", Event_HalfTime );
 }
 
-public void OnMapStart ( ) {
-    setTeamWeight ( );
-}
-
 /* 
 On round end check team sizes and make sure 
 1 bomb site = T has 1 more player than CT
@@ -39,6 +35,7 @@ On round end check team sizes and make sure
  */    
 
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
+    setTeamWeight ( );
     //unShieldAllPlayers ( );
 }
 
