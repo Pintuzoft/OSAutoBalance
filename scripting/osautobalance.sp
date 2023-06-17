@@ -104,21 +104,23 @@ public void fetchTeamData ( ) {
     tKD = 0.0;
     ctSteamids[0] = '\0';
     char tmpSteamid[32];
+    char shortSteamID[32];
     for ( int i = 0; i < MAXPLAYERS; i++ ) {
         if ( IsValidPlayer(i) ) {
             int team = GetClientTeam ( i );
             GetClientAuthId(i, AuthId_Engine, tmpSteamid, sizeof(tmpSteamid));
-            PrintToConsoleAll ( "OSAutoBalance: Steamid: %s", tmpSteamid );
+            strcopy(shortSteamID, sizeof(shortSteamID), tmpSteamid[7]);
+            PrintToConsoleAll ( "OSAutoBalance: Steamid: %s", shortSteamID );
             if ( team == CS_TEAM_CT ) {
                 ctSize++;
-                ctKD += GetClientKDRatio ( i );
+                //ctKD += GetClientKDRatio ( i );
                 if (ctSteamids[0] != '\0') {
                     StrCat(ctSteamids, sizeof(ctSteamids), ",");
                 }
                 StrCat(ctSteamids, sizeof(ctSteamids), tmpSteamid);
             } else if ( team == CS_TEAM_T ) {
                 tSize++;
-                tKD += GetClientKDRatio ( i );
+                //tKD += GetClientKDRatio ( i );
                 if (tSteamids[0] != '\0') {
                     StrCat(tSteamids, sizeof(tSteamids), ",");
                 }
@@ -130,16 +132,10 @@ public void fetchTeamData ( ) {
     }
 }
 
-public float GetClientKDRatio ( int client ) {
-    int kills = GetClientFrags ( client );
-    int deaths = GetClientDeaths ( client );
-    if ( deaths == 0 ) {
-        return kills;
-    }
-    return kills / deaths;
-}
 
 
+
+ 
 
 
 public void setTeamWeight ( ) {
