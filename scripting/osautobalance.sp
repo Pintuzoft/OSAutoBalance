@@ -11,7 +11,6 @@ if the map has only 1 bomb site it will make sure that T has 1 more player than 
 */
 
 int team[4][8];
-int bombSites = 0;
 int teamWeight = CS_TEAM_CT;
 
 public Plugin myinfo = {
@@ -22,13 +21,13 @@ public Plugin myinfo = {
 	url = "https://github.com/Pintuzoft/OSAutoBalance"
 }
  
-public void OnPluginStart ( ) {
+public OnPluginStart ( ) {
     HookEvent ( "round_start", Event_RoundStart );
     HookEvent ( "round_end", Event_RoundEnd );
     //HookEvent ( "announce_phase_end", Event_HalfTime );
 }
 
-public void OnMapStart ( ) {
+public OnMapStart ( ) {
     setTeamWeight ( );
 }
 
@@ -50,7 +49,7 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
 
  
 public void setTeamWeight ( ) {
-    bombSites = 0;
+    int bombSites = 0;
     int entity = 0;
     while ( ( entity = FindEntityByClassname ( entity, "func_bomb_target" ) ) != INVALID_ENT_REFERENCE ) {
         bombSites++;
