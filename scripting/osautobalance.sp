@@ -13,17 +13,41 @@ if the map has only 1 bomb site it will make sure that T has 1 more player than 
 char error[255];
 Handle mysql = null;
 
-int teamWeight = CS_TEAM_CT;
+int weight = CS_TEAM_CT;
 int ctSize = 0;
 int tSize = 0;
 float ctKD = 0.0;
 float tKD = 0.0;
-int players[MAXPLAYERS+1];
-char ctSteamids[512];
-char tSteamids[512];
 
-float teamCT_kd = 0.0;
-float teamT_kd = 0.0;
+/* KD from database */
+float databaseKD[MAXPLAYERS+1];
+
+/* KD from game */
+float gameKD[MAXPLAYERS+1];
+
+/* Player steamids */
+char steamIds[MAXPLAYERS+1][32];
+
+/* Player short steamids */
+char shortIds[MAXPLAYERS+1][32];
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -63,19 +87,9 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
 
     checkConnection();
 
-    /* Gather team data */
-    fetchTeamData ( );
+    /* Gather player data */
+    fetchPlayerData ( );
 
-    /* Gather team kd from database */
-    int teamCT_kd_db = 0;
-    int teamT_kd_db = 0;
-
-
-    PrintToConsoleAll ( "OSAutoBalance: Team CT size: %d, Team T size: %d", ctSize, tSize );
-    PrintToConsoleAll ( "OSAutoBalance: Team CT kd: %d, Team T kd: %d", teamCT_kd, teamT_kd );
-
-    PrintToConsoleAll ( "OSAutoBalance: CT Steamids: ", ctSteamids );
-    PrintToConsoleAll ( "OSAutoBalance: T Steamids: ", tSteamids );
 
     return Plugin_Continue;
 
@@ -97,41 +111,81 @@ public bool IsValidPlayer ( int client ) {
     return true;
 }
 
-public void fetchTeamData ( ) {
-    ctSize = 0;
-    ctKD = 0.0;
-    tSize = 0;
-    tKD = 0.0;
-    ctSteamids[0] = '\0';
-    char tmpSteamid[32];
-    char shortSteamID[32];
+public void resetData ( ) {
+    for ( int i = 0; i < MAXPLAYERS; i++ ) {
+        steamIds[i] = "";
+        shortIds[i] = "";
+        databaseKD[i] = 0.0;
+        gameKD[i] = 0.0;
+    }
+}
+
+/* fetch player data */
+public void fetchPlayerData ( ) {
+    char steamid[32];
+    char shortSteamId[32];
+
+    resetData ( );
+
     for ( int i = 0; i < MAXPLAYERS; i++ ) {
         if ( IsValidPlayer(i) ) {
-            int team = GetClientTeam ( i );
-            GetClientAuthId(i, AuthId_Engine, tmpSteamid, sizeof(tmpSteamid));
-            strcopy(shortSteamID, sizeof(shortSteamID), tmpSteamid[8]);
-            PrintToConsoleAll ( "OSAutoBalance: Steamid: %s", shortSteamID );
-            if ( team == CS_TEAM_CT ) {
-                ctSize++;
-                //ctKD += GetClientKDRatio ( i );
-                if (ctSteamids[0] != '\0') {
-                    StrCat(ctSteamids, sizeof(ctSteamids), ",");
-                }
-                StrCat(ctSteamids, sizeof(ctSteamids), tmpSteamid);
-            } else if ( team == CS_TEAM_T ) {
-                tSize++;
-                //tKD += GetClientKDRatio ( i );
-                if (tSteamids[0] != '\0') {
-                    StrCat(tSteamids, sizeof(tSteamids), ",");
-                }
-                StrCat(tSteamids, sizeof(tSteamids), tmpSteamid);
-            }
+            GetClientAuthId(i, AuthId_Engine, steamid, sizeof(steamid));
+            strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
+            strcopy(steamIds[i], 32, steamid);
+            strcopy(shortIds[i], 32, shortSteamId);
+            databaseGetKD ( i );
+
+            /* get player kills */
+            int frags = GetClientFrags ( i );
+
+            /* get player deaths */
+            int deaths = GetClientDeaths ( i );
+
+            /* calculate kd */
+            gameKD[i] = 0.0 + ( frags / deaths );
+
+            PrintToConsoleAll ( "OSAutoBalance: Steamid: %s", shortIds[i] );
+            PrintToConsoleAll ( "OSAutoBalance: KD: %f", gameKD[i] );
         } else {
-            players[i] = 0;
+            steamIds[i] = "";
+            shortIds[i] = "";
         }
     }
 }
 
+public void databaseGetKD ( int player ) {
+    checkConnection();
+    DBStatement stmt;
+    char query[255];
+
+    Format ( query, sizeof(query), "SELECT kd FROM players WHERE steamid = ?;" );
+    
+    if ( ( stmt = SQL_PrepareQuery ( mysql, query, error, sizeof(error) ) ) == null ) {
+        SQL_GetError ( mysql, error, sizeof(error));
+        PrintToServer("[OSAutoBalance]: Failed to prepare query[0x01] (error: %s)", error);
+        databaseKD[player] = 0.4;
+        return;
+    }
+
+
+    SQL_BindParamString ( stmt, 0, shortIds[player], false );
+    if ( ! SQL_Execute ( stmt ) ) {
+        SQL_GetError ( mysql, error, sizeof(error));
+        PrintToServer("[OSAutoBalance]: Failed to query[0x02] (error: %s)", error);
+        databaseKD[player] = 0.4;
+        return;
+    }
+
+    if ( SQL_FetchRow ( stmt ) ) {
+        databaseKD[player] = SQL_FetchFloat ( stmt, 0 );
+    } else {
+        databaseKD[player] = 0.4;
+    }
+
+    if ( stmt != null ) {
+        delete stmt;
+    }
+}
 
 
 
@@ -146,22 +200,22 @@ public void setTeamWeight ( ) {
     }
     /* IsHostageMap */
     if ( bombSites == 0 ) {
-        teamWeight = CS_TEAM_CT;
+        weight = CS_TEAM_CT;
 
     /* hasOneBombSite */
     } else if ( bombSites == 1 ) {
-        teamWeight = CS_TEAM_T;
+        weight = CS_TEAM_T;
 
     /* hasTwoBombSites */
     } else if ( bombSites == 2 ) {
-        teamWeight = CS_TEAM_CT;
+        weight = CS_TEAM_CT;
 
     /* hasThreeBombSites+ */
     } else {
-        teamWeight = CS_TEAM_CT;
+        weight = CS_TEAM_CT;
     }
     // log to console
-    PrintToConsoleAll ( "OSAutoBalance: Map has %d bomb sites. Map weight: %d", bombSites, teamWeight );
+    PrintToConsoleAll ( "OSAutoBalance: Map has %d bomb sites. Map weight: %d", bombSites, weight );
 
 
 }
