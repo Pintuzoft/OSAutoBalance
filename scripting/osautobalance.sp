@@ -147,12 +147,19 @@ public void databaseGetKD ( int player ) {
     checkConnection();
     DBStatement stmt;
     char query[255];
+    PrintToConsoleAll("[OSAutoBalance]: 0");
 
     PrintToChatAll("[OSAutoBalance]: Fetching KD for player %s", shortIds[player]);
 
     Format ( query, sizeof(query), "SELECT kd FROM players WHERE steamid = ?;" );
-    
+
+    PrintToConsoleAll("[OSAutoBalance]: 1");
+
+
+
     if ( ( stmt = SQL_PrepareQuery ( mysql, query, error, sizeof(error) ) ) == null ) {
+
+        PrintToConsoleAll("[OSAutoBalance]: 2");
         SQL_GetError ( mysql, error, sizeof(error));
         PrintToServer("[OSAutoBalance]: Failed to prepare query[0x01] (error: %s)", error);
         databaseKD[player] = 0.4;
@@ -161,6 +168,8 @@ public void databaseGetKD ( int player ) {
 
     SQL_BindParamString ( stmt, 0, shortIds[player], false );
     if ( ! SQL_Execute ( stmt ) ) {
+
+        PrintToConsoleAll("[OSAutoBalance]: 3");
         SQL_GetError ( mysql, error, sizeof(error));
         PrintToServer("[OSAutoBalance]: Failed to query[0x02] (error: %s)", error);
         databaseKD[player] = 0.4;
@@ -168,11 +177,14 @@ public void databaseGetKD ( int player ) {
     }
 
     if ( SQL_FetchRow ( stmt ) ) {
+        PrintToConsoleAll("[OSAutoBalance]: 4");
         databaseKD[player] = SQL_FetchFloat ( stmt, 0 );
     } else {
+        PrintToConsoleAll("[OSAutoBalance]: 5");
         databaseKD[player] = 0.4;
 
     }
+
 
     if ( stmt != null ) {
         delete stmt;
