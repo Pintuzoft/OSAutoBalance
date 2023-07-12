@@ -76,6 +76,7 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
     fetchPlayerData ( );
 
 
+
     return Plugin_Continue;
 
 }
@@ -119,6 +120,8 @@ public void fetchPlayerData ( ) {
             strcopy(steamIds[i], 32, steamid);
             strcopy(shortIds[i], 32, shortSteamId);
             databaseGetKD ( i );
+            PrintToChatAll ( "OSAutoBalance: Steamid: %s", shortIds[i] );
+            PrintToChatAll ( "OSAutoBalance: databaseKD: %f", databaseKD[i] );
 
             /* get player kills */
             int frags = GetClientFrags ( i );
@@ -132,8 +135,7 @@ public void fetchPlayerData ( ) {
             } else {
                 gameKD[i] = 0.0 + ( frags / deaths );
             }
-            PrintToConsoleAll ( "OSAutoBalance: Steamid: %s", shortIds[i] );
-            PrintToConsoleAll ( "OSAutoBalance: KD: %f", gameKD[i] );
+            PrintToChatAll ( "OSAutoBalance: gameKD: %f", gameKD[i] );
         } else {
             steamIds[i] = "";
             shortIds[i] = "";
