@@ -146,18 +146,15 @@ public void fetchPlayerData ( ) {
 public void databaseGetKD ( int player ) {
     checkConnection();
     DBStatement stmt;
-    char query[255];
     PrintToConsoleAll("[OSAutoBalance]: 0");
 
     PrintToChatAll("[OSAutoBalance]: Fetching KD for player %s", shortIds[player]);
-
-    Format ( query, sizeof(query), "SELECT kd FROM players WHERE steamid = ?;" );
 
     PrintToConsoleAll("[OSAutoBalance]: 1");
 
 
 
-    if ( ( stmt = SQL_PrepareQuery ( mysql, query, error, sizeof(error) ) ) == null ) {
+    if ( ( stmt = SQL_PrepareQuery ( mysql, "SELECT kd FROM players WHERE steamid = ?", error, sizeof(error) ) ) == null ) {
 
         PrintToConsoleAll("[OSAutoBalance]: 2");
         SQL_GetError ( mysql, error, sizeof(error));
