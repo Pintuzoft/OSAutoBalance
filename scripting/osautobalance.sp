@@ -154,7 +154,7 @@ public void databaseGetKD ( int player ) {
 
 
 
-    if ( ( stmt = SQL_PrepareQuery ( mysql, "SELECT kd FROM players WHERE steamid = ?", error, sizeof(error) ) ) == null ) {
+    if ( ( stmt = SQL_PrepareQuery ( mysql, "SELECT kd FROM player WHERE steamid = ?", error, sizeof(error) ) ) == null ) {
 
         PrintToConsoleAll("[OSAutoBalance]: 2");
         SQL_GetError ( mysql, error, sizeof(error));
