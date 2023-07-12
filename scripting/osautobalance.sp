@@ -207,7 +207,7 @@ public void setTeamWeight ( ) {
 }
 
 public void databaseConnect() {
-    if ((mysql = SQL_Connect("hlxce", true, error, sizeof(error))) != null) {
+    if ((mysql = SQL_Connect("osautobalance", true, error, sizeof(error))) != null) {
         PrintToServer("[OSAutoBalance]: Connected to mysql database!");
     } else {
         PrintToServer("[OSAutoBalance]: Failed to connect to mysql database! (error: %s)", error);
