@@ -127,8 +127,11 @@ public void fetchPlayerData ( ) {
             int deaths = GetClientDeaths ( i );
 
             /* calculate kd */
-            gameKD[i] = 0.0 + ( frags / deaths );
-
+            if ( deaths == 0 ) {
+                gameKD[i] = 0.0 + frags;
+            } else {
+                gameKD[i] = 0.0 + ( frags / deaths );
+            }
             PrintToConsoleAll ( "OSAutoBalance: Steamid: %s", shortIds[i] );
             PrintToConsoleAll ( "OSAutoBalance: KD: %f", gameKD[i] );
         } else {
