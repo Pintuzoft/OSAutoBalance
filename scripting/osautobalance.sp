@@ -35,22 +35,6 @@ char shortIds[MAXPLAYERS+1][32];
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 public Plugin myinfo = {
 	name = "OSAutoBalance",
 	author = "Pintuz",
@@ -60,7 +44,7 @@ public Plugin myinfo = {
 }
  
 public void OnPluginStart ( ) {
-    checkConnection();
+    databaseConnect();
     HookEvent ( "round_start", Event_RoundStart );
     HookEvent ( "round_end", Event_RoundEnd );
     //HookEvent ( "announce_phase_end", Event_HalfTime );
