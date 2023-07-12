@@ -143,6 +143,8 @@ public void databaseGetKD ( int player ) {
     DBStatement stmt;
     char query[255];
 
+    PrintToServer("[OSAutoBalance]: Fetching KD for player %s", shortIds[player]);
+
     Format ( query, sizeof(query), "SELECT kd FROM players WHERE steamid = ?;" );
     
     if ( ( stmt = SQL_PrepareQuery ( mysql, query, error, sizeof(error) ) ) == null ) {
