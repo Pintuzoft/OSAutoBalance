@@ -60,6 +60,7 @@ public Plugin myinfo = {
 }
  
 public void OnPluginStart ( ) {
+    checkConnection();
     HookEvent ( "round_start", Event_RoundStart );
     HookEvent ( "round_end", Event_RoundEnd );
     //HookEvent ( "announce_phase_end", Event_HalfTime );
