@@ -44,6 +44,7 @@ public Plugin myinfo = {
 }
  
 public void OnPluginStart ( ) {
+    mysql = null;
     databaseConnect();
     HookEvent ( "round_start", Event_RoundStart );
     HookEvent ( "round_end", Event_RoundEnd );
