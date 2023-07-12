@@ -143,7 +143,7 @@ public void databaseGetKD ( int player ) {
     DBStatement stmt;
     char query[255];
 
-    PrintToServer("[OSAutoBalance]: Fetching KD for player %s", shortIds[player]);
+    PrintToChatAll("[OSAutoBalance]: Fetching KD for player %s", shortIds[player]);
 
     Format ( query, sizeof(query), "SELECT kd FROM players WHERE steamid = ?;" );
     
@@ -153,7 +153,6 @@ public void databaseGetKD ( int player ) {
         databaseKD[player] = 0.4;
         return;
     }
-
 
     SQL_BindParamString ( stmt, 0, shortIds[player], false );
     if ( ! SQL_Execute ( stmt ) ) {
@@ -167,6 +166,7 @@ public void databaseGetKD ( int player ) {
         databaseKD[player] = SQL_FetchFloat ( stmt, 0 );
     } else {
         databaseKD[player] = 0.4;
+
     }
 
     if ( stmt != null ) {
