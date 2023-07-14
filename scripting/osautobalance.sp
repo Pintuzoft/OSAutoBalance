@@ -114,7 +114,7 @@ public void fetchPlayerData ( ) {
     resetData ( );
 
     for ( int i = 0; i < MAXPLAYERS; i++ ) {
-        if ( IsValidPlayer(i) ) {
+     //   if ( IsValidPlayer(i) ) {
             GetClientAuthId(i, AuthId_Engine, steamid, sizeof(steamid));
             strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
             strcopy(steamIds[i], 32, steamid);
@@ -136,10 +136,10 @@ public void fetchPlayerData ( ) {
                 gameKD[i] = 0.0 + ( frags / deaths );
             }
             PrintToChatAll ( "OSAutoBalance: gameKD: %f", gameKD[i] );
-        } else {
-            steamIds[i] = "";
-            shortIds[i] = "";
-        }
+    //    } else {
+    //        steamIds[i] = "";
+    //        shortIds[i] = "";
+    //    }
     }
 }
 
@@ -151,8 +151,6 @@ public void databaseGetKD ( int player ) {
     PrintToChatAll("[OSAutoBalance]: Fetching KD for player %s", shortIds[player]);
 
     PrintToConsoleAll("[OSAutoBalance]: 1");
-
-
 
     if ( ( stmt = SQL_PrepareQuery ( mysql, "SELECT kd FROM player WHERE steamid = ?", error, sizeof(error) ) ) == null ) {
 
