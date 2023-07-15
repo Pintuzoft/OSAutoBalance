@@ -101,7 +101,7 @@ public bool IsValidPlayer ( int client ) {
 }
 
 public void resetData ( ) {
-    for ( int i = 0; i < MAXPLAYERS; i++ ) {
+    for ( int i = 1; i <= MAXPLAYERS; i++ ) {
         steamIds[i] = "";
         shortIds[i] = "";
         databaseKD[i] = 0.0;
@@ -117,7 +117,7 @@ public void fetchPlayerData ( ) {
 
     resetData ( );
 
-    for ( int i = 0; i < MAXPLAYERS; i++ ) {
+    for ( int i = 1; i <= MAXPLAYERS; i++ ) {
         if ( typeKD[i] == 0 ) {
             if ( IsValidPlayer(i) ) {
                 GetClientAuthId(i, AuthId_Engine, steamid, sizeof(steamid));
