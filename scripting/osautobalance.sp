@@ -31,8 +31,8 @@ char steamIds[MAXPLAYERS+1][32];
 /* Player short steamids */
 char shortIds[MAXPLAYERS+1][32];
 
-
-
+/* KD type 1=db, 2=autogen */
+int typeKD[MAXPLAYERS+1];
 
 
 public Plugin myinfo = {
@@ -75,7 +75,10 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
     /* Gather player data */
     fetchPlayerData ( );
 
-
+    /* print all gathered player information */
+    for ( int i=0; i<MAXPLAYERS; i++ ) {
+        PrintToConsoleAll("[OSAutoBalance]: %s:%f:%i", shortIds[i], databaseKD[i], typeKD[i]);
+    }
 
     return Plugin_Continue;
 
@@ -103,6 +106,7 @@ public void resetData ( ) {
         shortIds[i] = "";
         databaseKD[i] = 0.0;
         gameKD[i] = 0.0;
+        typeKD[i] = 0;
     }
 }
 
@@ -114,32 +118,35 @@ public void fetchPlayerData ( ) {
     resetData ( );
 
     for ( int i = 0; i < MAXPLAYERS; i++ ) {
-     //   if ( IsValidPlayer(i) ) {
-            GetClientAuthId(i, AuthId_Engine, steamid, sizeof(steamid));
-            strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
-            strcopy(steamIds[i], 32, steamid);
-            strcopy(shortIds[i], 32, shortSteamId);
-            databaseGetKD ( i );
-            PrintToChatAll ( "OSAutoBalance: Steamid: %s", shortIds[i] );
-            PrintToChatAll ( "OSAutoBalance: databaseKD: %f", databaseKD[i] );
+        if ( typeKD[i] == 0 ) {
+            if ( IsValidPlayer(i) ) {
+                GetClientAuthId(i, AuthId_Engine, steamid, sizeof(steamid));
+                strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
+                strcopy(steamIds[i], 32, steamid);
+                strcopy(shortIds[i], 32, shortSteamId);
+                databaseGetKD ( i );
+                typeKD[i] = 1;
 
-            /* get player kills */
-            int frags = GetClientFrags ( i );
+                /* get player kills */
+                int frags = GetClientFrags ( i );
 
-            /* get player deaths */
-            int deaths = GetClientDeaths ( i );
+                /* get player deaths */
+                int deaths = GetClientDeaths ( i );
 
-            /* calculate kd */
-            if ( deaths == 0 ) {
-                gameKD[i] = 0.0 + frags;
+                /* calculate kd */
+                if ( deaths == 0 ) {
+                    gameKD[i] = 0.0 + frags;
+                } else {
+                    gameKD[i] = 0.0 + ( frags / deaths );
+                }
             } else {
-                gameKD[i] = 0.0 + ( frags / deaths );
+                typeKD[i] = 2;
+                steamIds[i] = "";
+                shortIds[i] = "";
+                /* random KD from database */
+                databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 1.6 ) );
             }
-            PrintToChatAll ( "OSAutoBalance: gameKD: %f", gameKD[i] );
-    //    } else {
-    //        steamIds[i] = "";
-    //        shortIds[i] = "";
-    //    }
+        }
     }
 }
 
@@ -153,7 +160,6 @@ public void databaseGetKD ( int player ) {
     PrintToConsoleAll("[OSAutoBalance]: 1");
 
     if ( ( stmt = SQL_PrepareQuery ( mysql, "SELECT kd FROM player WHERE steamid = ?", error, sizeof(error) ) ) == null ) {
-
         PrintToConsoleAll("[OSAutoBalance]: 2");
         SQL_GetError ( mysql, error, sizeof(error));
         PrintToServer("[OSAutoBalance]: Failed to prepare query[0x01] (error: %s)", error);
@@ -179,7 +185,6 @@ public void databaseGetKD ( int player ) {
         databaseKD[player] = 0.4;
 
     }
-
 
     if ( stmt != null ) {
         delete stmt;
