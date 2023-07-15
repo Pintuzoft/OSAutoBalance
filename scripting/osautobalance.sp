@@ -140,11 +140,13 @@ public void fetchPlayerData ( ) {
                     gameKD[i] = 0.0 + ( frags / deaths );
                 }
             } else {
-                typeKD[i] = 2;
-                steamIds[i] = "";
-                shortIds[i] = "";
-                /* random KD from database */
-                databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 1.6 ) );
+                if ( ClientInGame(i) ) {
+                    typeKD[i] = 2;
+                    steamIds[i] = "";
+                    shortIds[i] = "";
+                    /* random KD from database */
+                    databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 1.6 ) );
+                }
             }
         }
     }
