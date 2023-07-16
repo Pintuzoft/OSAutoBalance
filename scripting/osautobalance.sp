@@ -86,6 +86,7 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
 
     /* print all gathered player information */
     for ( int i=1; i <= MAXPLAYERS; i++ ) {
+        PrintToConsoleAll("[OSAutoBalance]: printing player data");
         PrintToConsoleAll("[OSAutoBalance]: %s:%f:%i", shortIds[i], databaseKD[i], typeKD[i]);
     }
 
