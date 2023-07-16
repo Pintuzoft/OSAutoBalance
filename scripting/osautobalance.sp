@@ -137,6 +137,7 @@ public void fetchPlayerData ( ) {
                 strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
                 strcopy(steamIds[i], 32, steamid);
                 strcopy(shortIds[i], 32, shortSteamId);
+                PrintToConsoleAll("[OSAutoBalance]: Get KD for player %s", shortIds[i]);
                 databaseGetKD ( i );
                 typeKD[i] = 1;
 
