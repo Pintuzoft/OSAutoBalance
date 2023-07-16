@@ -41,8 +41,11 @@ public Plugin myinfo = {
  
 public void OnPluginStart ( ) {
     databaseConnect();
+    resetAllData();
     HookEvent ( "round_start", Event_RoundStart );
     HookEvent ( "round_end", Event_RoundEnd );
+    HookEvent ( "player_connect", Event_PlayerConnect );
+    HookEvent ( "player_disconnect", Event_PlayerDisconnect );
     //HookEvent ( "announce_phase_end", Event_HalfTime );
 }
 
@@ -62,6 +65,16 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
     setTeamWeight ( );
     int winTeam = GetEventInt(event, "winner");
     CreateTimer ( 5.5, handleRoundEnd, winTeam );
+}
+
+public void Event_PlayerConnect ( Event event, const char[] name, bool dontBroadcast ) {
+    int client = GetEventInt(event, "userid");
+    resetPlayerData ( client );
+}
+
+public void Event_PlayerDisconnect ( Event event, const char[] name, bool dontBroadcast ) {
+    int client = GetEventInt(event, "userid");
+    resetPlayerData ( client );
 }
 
 public Action handleRoundEnd ( Handle timer, int winTeam ) {
@@ -96,14 +109,19 @@ public bool IsValidPlayer ( int client ) {
     return true;
 }
 
-public void resetData ( ) {
+public void resetAllData ( ) {
     for ( int i = 1; i <= MAXPLAYERS; i++ ) {
-        steamIds[i] = "";
-        shortIds[i] = "";
-        databaseKD[i] = 0.0;
-        gameKD[i] = 0.0;
-        typeKD[i] = 0;
+        resetPlayerData ( i );
     }
+}
+
+
+public void resetPlayerData ( int client ) {
+    steamIds[client] = "";
+    shortIds[client] = "";
+    databaseKD[client] = 0.0;
+    gameKD[client] = 0.0;
+    typeKD[client] = 0;
 }
 
 /* fetch player data */
@@ -111,11 +129,9 @@ public void fetchPlayerData ( ) {
     char steamid[32];
     char shortSteamId[32];
 
-    resetData ( );
-
     for ( int i = 1; i <= MAXPLAYERS; i++ ) {
         if ( typeKD[i] == 0 ) {
-            if ( IsClientConnected(i) ) {
+            if ( IsClientConnected(i) && typeKD[i] == 0 ) {
                 GetClientAuthId(i, AuthId_Engine, steamid, sizeof(steamid));
                 strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
                 strcopy(steamIds[i], 32, steamid);
