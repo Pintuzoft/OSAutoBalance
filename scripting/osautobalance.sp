@@ -14,10 +14,6 @@ char error[255];
 Handle mysql = null;
 
 int weight = CS_TEAM_CT;
-int ctSize = 0;
-int tSize = 0;
-float ctKD = 0.0;
-float tKD = 0.0;
 
 /* KD from database */
 float databaseKD[MAXPLAYERS+1];
@@ -119,7 +115,7 @@ public void fetchPlayerData ( ) {
 
     for ( int i = 1; i <= MAXPLAYERS; i++ ) {
         if ( typeKD[i] == 0 ) {
-            if ( IsValidPlayer(i) ) {
+            if ( IsClientConnected(i) ) {
                 GetClientAuthId(i, AuthId_Engine, steamid, sizeof(steamid));
                 strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
                 strcopy(steamIds[i], 32, steamid);
@@ -139,7 +135,7 @@ public void fetchPlayerData ( ) {
                 } else {
                     gameKD[i] = 0.0 + ( frags / deaths );
                 }
-            } else if ( IsFakeClient(i) ) {
+            } else {
                 if ( IsClientInGame(i) ) {
                     typeKD[i] = 2;
                     steamIds[i] = "";
@@ -149,8 +145,6 @@ public void fetchPlayerData ( ) {
                 } else {
                     typeKD[i] = 0;
                 }
-            } else {
-                typeKD[i] = 0;
             }
         }
     }
