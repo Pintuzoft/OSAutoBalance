@@ -85,7 +85,7 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
     fetchPlayerData ( );
 
     /* print all gathered player information */
-    for ( int i=0; i<MAXPLAYERS; i++ ) {
+    for ( int i=1; i <= MAXPLAYERS; i++ ) {
         PrintToConsoleAll("[OSAutoBalance]: %s:%f:%i", shortIds[i], databaseKD[i], typeKD[i]);
     }
 
@@ -131,7 +131,7 @@ public void fetchPlayerData ( ) {
 
     for ( int i = 1; i <= MAXPLAYERS; i++ ) {
         if ( typeKD[i] == 0 ) {
-            if ( IsClientConnected(i) && typeKD[i] == 0 ) {
+            if ( IsValidPlayer ( i ) ) {
                 GetClientAuthId(i, AuthId_Engine, steamid, sizeof(steamid));
                 strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
                 strcopy(steamIds[i], 32, steamid);
