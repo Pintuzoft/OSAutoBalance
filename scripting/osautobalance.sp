@@ -86,7 +86,7 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
 
     /* print all gathered player information */
     for ( int i=1; i < MAXPLAYERS; i++ ) {
-        if ( IsClientConnected ( i ) ) {
+        if ( IsClientConnected ( i ) && ! IsClientSourceTV ( i ) ) {
             /* get player name */
             GetClientName ( i, name, sizeof(name) );
             PrintToConsoleAll("[OSAutoBalance]: %s:%s:%f:%i", name, shortIds[i], databaseKD[i], typeKD[i]);
@@ -118,7 +118,6 @@ public void fetchPlayerData ( ) {
     char shortSteamId[32];
 
     for ( int i = 1; i <= MAXPLAYERS; i++ ) {
-        PrintToConsoleAll("[OSAutoBalance]: Fetching data for player %i", i);
         if ( typeKD[i] == 0 ) {
             PrintToConsoleAll("[OSAutoBalance]: 0");
 
