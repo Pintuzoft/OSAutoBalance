@@ -97,19 +97,6 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
 
 }
 
-public bool IsValidPlayer ( int client ) {
-    if ( client < 1 || client >= 65 ) {
-        return false;
-    }
-    if ( !IsClientConnected ( client ) ) {
-        return false;
-    }
-    if ( IsFakeClient ( client ) ) {
-        return false;
-    }
-    return true;
-}
-
 public void resetAllData ( ) {
     for ( int i = 1; i <= MAXPLAYERS; i++ ) {
         resetPlayerData ( i );
@@ -132,7 +119,7 @@ public void fetchPlayerData ( ) {
 
     for ( int i = 1; i <= MAXPLAYERS; i++ ) {
         if ( typeKD[i] == 0 ) {
-            if ( IsValidPlayer ( i ) ) {
+            if ( playerIsReal ( i ) ) {
                 GetClientAuthId(i, AuthId_Engine, steamid, sizeof(steamid));
                 strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
                 strcopy(steamIds[i], 32, steamid);
@@ -154,15 +141,11 @@ public void fetchPlayerData ( ) {
                     gameKD[i] = 0.0 + ( frags / deaths );
                 }
             } else {
-                if ( ! IsValidPlayer(i) ) {
-                    typeKD[i] = 2;
-                    steamIds[i] = "";
-                    shortIds[i] = "";
-                    /* random KD from database */
-                    databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 1.6 ) );
-                } else {
-                    typeKD[i] = 0;
-                }
+                typeKD[i] = 2;
+                steamIds[i] = "";
+                shortIds[i] = "";
+                /* random KD from database */
+                databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
             }
         }
     }
@@ -256,3 +239,8 @@ public void checkConnection() {
     }
 }
 
+public bool playerIsReal ( int player ) {
+    return ( player > 0 &&
+             IsClientInGame ( player ) &&
+             ! IsClientSourceTV ( player ) );
+}
