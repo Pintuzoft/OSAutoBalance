@@ -118,10 +118,15 @@ public void fetchPlayerData ( ) {
     char shortSteamId[32];
 
     for ( int i = 1; i <= MAXPLAYERS; i++ ) {
+        PrintToConsoleAll("[OSAutoBalance]: Fetching data for player %i", i);
         if ( typeKD[i] == 0 ) {
+            PrintToConsoleAll("[OSAutoBalance]: 0");
+
             if ( playerIsReal ( i ) ) {
+                PrintToConsoleAll("[OSAutoBalance]: 1");
                 GetClientAuthId(i, AuthId_Engine, steamid, sizeof(steamid));
                 if ( isValidSteamID ( steamid ) ) {
+                    PrintToConsoleAll("[OSAutoBalance]: 2");
                     strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
                     strcopy(steamIds[i], 32, steamid);
                     strcopy(shortIds[i], 32, shortSteamId);
@@ -129,6 +134,9 @@ public void fetchPlayerData ( ) {
                     databaseGetKD ( i );
                     typeKD[i] = 1;
                 } else {
+                    
+                    PrintToConsoleAll("[OSAutoBalance]: 3");
+
                     typeKD[i] = 0;
                     steamIds[i] = "";
                     shortIds[i] = "";
@@ -136,6 +144,7 @@ public void fetchPlayerData ( ) {
                     /* random KD from database */
                     databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
                 }
+                PrintToConsoleAll("[OSAutoBalance]: 4");
                 /* get player kills */
                 int frags = GetClientFrags ( i );
 
@@ -149,12 +158,14 @@ public void fetchPlayerData ( ) {
                     gameKD[i] = 0.0 + ( frags / deaths );
                 }
             } else {
+                PrintToConsoleAll("[OSAutoBalance]: 5");
                 typeKD[i] = 2;
                 steamIds[i] = "";
                 shortIds[i] = "";
                 /* random KD from database */
                 databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
             }
+            PrintToConsoleAll("[OSAutoBalance]: 6");
         }
     }
 }
