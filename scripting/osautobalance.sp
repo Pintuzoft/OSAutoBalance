@@ -95,7 +95,7 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
 }
 
 public bool IsValidPlayer ( int client ) {
-    if ( client < 1 || client > MAXPLAYERS ) {
+    if ( client < 1 || client >= 65 ) {
         return false;
     }
     if ( !IsClientInGame ( client ) ) {
