@@ -240,7 +240,8 @@ public void checkConnection() {
 }
 
 public bool playerIsReal ( int player ) {
-    return ( player > 0 &&
+    return ( player > 0 && 
+             player < MAXPLAYERS &&
              IsClientInGame ( player ) &&
              ! IsClientSourceTV ( player ) );
 }
