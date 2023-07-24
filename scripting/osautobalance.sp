@@ -251,6 +251,7 @@ public bool playerIsReal ( int player ) {
     return ( player > 0 && 
              player < MAXPLAYERS &&
              IsClientInGame ( player ) &&
+             ! IsFakeClient ( player ) &&
              ! IsClientSourceTV ( player ) );
 }
 public bool isValidSteamID ( char authid[32] ) {
