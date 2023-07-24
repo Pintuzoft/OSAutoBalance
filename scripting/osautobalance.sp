@@ -121,13 +121,21 @@ public void fetchPlayerData ( ) {
         if ( typeKD[i] == 0 ) {
             if ( playerIsReal ( i ) ) {
                 GetClientAuthId(i, AuthId_Engine, steamid, sizeof(steamid));
-                strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
-                strcopy(steamIds[i], 32, steamid);
-                strcopy(shortIds[i], 32, shortSteamId);
-                PrintToConsoleAll("[OSAutoBalance]: Get KD for player %s", shortIds[i]);
-                databaseGetKD ( i );
-                typeKD[i] = 1;
-
+                if ( isValidSteamID ( steamid ) ) {
+                    strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
+                    strcopy(steamIds[i], 32, steamid);
+                    strcopy(shortIds[i], 32, shortSteamId);
+                    PrintToConsoleAll("[OSAutoBalance]: Get KD for player %s", shortIds[i]);
+                    databaseGetKD ( i );
+                    typeKD[i] = 1;
+                } else {
+                    typeKD[i] = 0;
+                    steamIds[i] = "";
+                    shortIds[i] = "";
+                    PrintToConsoleAll("[OSAutoBalance]: Random KD for player %s", steamid);
+                    /* random KD from database */
+                    databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
+                }
                 /* get player kills */
                 int frags = GetClientFrags ( i );
 
@@ -244,4 +252,15 @@ public bool playerIsReal ( int player ) {
              player < MAXPLAYERS &&
              IsClientInGame ( player ) &&
              ! IsClientSourceTV ( player ) );
+}
+public bool isValidSteamID ( char authid[32] ) {
+    if ( stringContains ( authid, "STEAM_0" ) ) {
+        return true;
+    } else if ( stringContains ( authid, "STEAM_1" ) ) {
+        return true;
+    }
+    return false;
+}
+public bool stringContains ( char string[32], char match[32] ) {
+    return ( StrContains ( string, match, false ) != -1 );
 }
