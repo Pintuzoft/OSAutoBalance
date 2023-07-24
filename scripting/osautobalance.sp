@@ -151,7 +151,7 @@ public void fetchPlayerData ( ) {
                     gameKD[i] = 0.0 + ( frags / deaths );
                 }
             } else {
-                if ( IsClientInGame(i) ) {
+                if ( ! IsValidPlayer(i) ) {
                     typeKD[i] = 2;
                     steamIds[i] = "";
                     shortIds[i] = "";
