@@ -78,7 +78,7 @@ public void Event_PlayerDisconnect ( Event event, const char[] name, bool dontBr
 }
 
 public Action handleRoundEnd ( Handle timer, int winTeam ) {
-
+    char name[32];
     checkConnection();
 
     /* Gather player data */
@@ -87,7 +87,11 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
     /* print all gathered player information */
     for ( int i=1; i <= MAXPLAYERS; i++ ) {
         if ( IsFakeClient ( i ) || IsValidPlayer ( i ) ) {
-            PrintToConsoleAll("[OSAutoBalance]: %s:%f:%i", shortIds[i], databaseKD[i], typeKD[i]);
+
+            /* get player name */
+            GetClientName ( i, name, sizeof(name) );
+
+            PrintToConsoleAll("[OSAutoBalance]: %s:%s:%f:%i", name, shortIds[i], databaseKD[i], typeKD[i]);
         }
     }
 
