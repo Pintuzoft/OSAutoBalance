@@ -98,9 +98,6 @@ public bool IsValidPlayer ( int client ) {
     if ( client < 1 || client >= 65 ) {
         return false;
     }
-    if ( !IsClientInGame ( client ) ) {
-        return false;
-    }
     if ( !IsClientConnected ( client ) ) {
         return false;
     }
