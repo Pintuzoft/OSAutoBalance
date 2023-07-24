@@ -95,7 +95,7 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
 }
 
 public bool IsValidPlayer ( int client ) {
-    if ( client < 1 || client >= MAXPLAYERS ) {
+    if ( client < 1 || client > MAXPLAYERS ) {
         return false;
     }
     if ( !IsClientInGame ( client ) ) {
@@ -237,7 +237,7 @@ public void setTeamWeight ( ) {
         weight = CS_TEAM_CT;
     }
     // log to console
-    PrintToConsoleAll ( "OSAutoBalance: Map has %d bomb sites. Map weight: %d", bombSites, weight );
+//    PrintToConsoleAll ( "OSAutoBalance: Map has %d bomb sites. Map weight: %d", bombSites, weight );
 
 
 }
