@@ -86,11 +86,11 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
 
     /* print all gathered player information */
     for ( int i=1; i <= MAXPLAYERS; i++ ) {
-        
-        /* get player name */
-        GetClientName ( i, name, sizeof(name) );
-        PrintToConsoleAll("[OSAutoBalance]: %s:%s:%f:%i", name, shortIds[i], databaseKD[i], typeKD[i]);
-       
+        if ( IsClientConnected ( i ) ) {
+            /* get player name */
+            GetClientName ( i, name, sizeof(name) );
+            PrintToConsoleAll("[OSAutoBalance]: %s:%s:%f:%i", name, shortIds[i], databaseKD[i], typeKD[i]);
+        }
     }
 
     return Plugin_Continue;
