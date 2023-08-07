@@ -46,6 +46,8 @@ public void OnPluginStart ( ) {
     HookEvent ( "round_end", Event_RoundEnd );
     HookEvent ( "player_connect", Event_PlayerConnect );
     HookEvent ( "player_disconnect", Event_PlayerDisconnect );
+    HookEvent ( "announce_match_start", Event_MatchStart );
+
     //HookEvent ( "announce_phase_end", Event_HalfTime );
 }
 
@@ -56,9 +58,16 @@ On round end check team sizes and make sure
 3 bomb sites = CT has 1 more player than T
  */    
 
+public void Event_MatchStart ( Event event, const char[] name, bool dontBroadcast ) {
+    setTeamWeight ( );
+    resetAllData();
+    fetchPlayerData();
+}
+
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
 //    setTeamWeight ( );
     //unShieldAllPlayers ( );
+
 }
 
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
@@ -119,13 +128,14 @@ public void fetchPlayerData ( ) {
 
     for ( int i = 1; i <= MAXPLAYERS; i++ ) {
         if ( typeKD[i] == 0 ) {
-            PrintToConsoleAll("[OSAutoBalance]: 0");
+            GetClientAuthId(i, AuthId_Engine, steamid, sizeof(steamid));
+            PrintToConsoleAll("[OSAutoBalance]: 0:%s",steamid);
 
             if ( playerIsReal ( i ) ) {
-                PrintToConsoleAll("[OSAutoBalance]: 1");
-                GetClientAuthId(i, AuthId_Engine, steamid, sizeof(steamid));
+                PrintToConsoleAll("[OSAutoBalance]: 1:playerIsReal");
+                
                 if ( isValidSteamID ( steamid ) ) {
-                    PrintToConsoleAll("[OSAutoBalance]: 2");
+                    PrintToConsoleAll("[OSAutoBalance]: 2:isValidSteamID");
                     strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
                     strcopy(steamIds[i], 32, steamid);
                     strcopy(shortIds[i], 32, shortSteamId);
@@ -134,7 +144,7 @@ public void fetchPlayerData ( ) {
                     typeKD[i] = 1;
                 } else {
                     
-                    PrintToConsoleAll("[OSAutoBalance]: 3");
+                    PrintToConsoleAll("[OSAutoBalance]: 3:isNotValidSteamID");
 
                     typeKD[i] = 0;
                     steamIds[i] = "";
@@ -143,7 +153,7 @@ public void fetchPlayerData ( ) {
                     /* random KD from database */
                     databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
                 }
-                PrintToConsoleAll("[OSAutoBalance]: 4");
+                PrintToConsoleAll("[OSAutoBalance]: 4:");
                 /* get player kills */
                 int frags = GetClientFrags ( i );
 
@@ -157,14 +167,14 @@ public void fetchPlayerData ( ) {
                     gameKD[i] = 0.0 + ( frags / deaths );
                 }
             } else {
-                PrintToConsoleAll("[OSAutoBalance]: 5");
+                PrintToConsoleAll("[OSAutoBalance]: 5:playerIsNotReal");
                 typeKD[i] = 2;
                 steamIds[i] = "";
                 shortIds[i] = "";
                 /* random KD from database */
                 databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
             }
-            PrintToConsoleAll("[OSAutoBalance]: 6");
+            PrintToConsoleAll("[OSAutoBalance]: 6:done");
         }
     }
 }
