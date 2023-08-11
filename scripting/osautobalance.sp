@@ -151,44 +151,24 @@ public void fetchPlayerData ( ) {
         GetClientAuthId(i, AuthId_Steam2, steamid, sizeof(steamid));
         PrintToConsoleAll("[OSAutoBalance]: 1:%s", nameKD[i]);
         if ( typeKD[i] == 0 ) {
-            PrintToConsoleAll("[OSAutoBalance]: 2:%s",steamid);
 
             if ( playerIsReal ( i ) ) {
-                PrintToConsoleAll("[OSAutoBalance]: 3:playerIsReal");
                 
                 if ( isValidSteamID ( steamid ) ) {
-                    PrintToConsoleAll("[OSAutoBalance]: 4:isValidSteamID");
                     strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
                     strcopy(steamIds[i], 32, steamid);
                     strcopy(shortIds[i], 32, shortSteamId);
-                    PrintToConsoleAll("[OSAutoBalance]: 5:Get KD for player %s", shortIds[i]);
                     databaseGetKD ( i );
                     typeKD[i] = 1;
                 } else {
-                    PrintToConsoleAll("[OSAutoBalance]: 6:isNotValidSteamID");
                     typeKD[i] = 0;
                     steamIds[i] = "";
                     shortIds[i] = "";
-                    PrintToConsoleAll("[OSAutoBalance]: 7:Random KD for player %s", steamid);
                     /* random KD from database */
                     databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
                 }
-                PrintToConsoleAll("[OSAutoBalance]: 8:");
-                /* get player kills */
-                int frags = GetClientFrags ( i );
-
-                /* get player deaths */
-                int deaths = GetClientDeaths ( i );
-
-                /* calculate kd */
-                if ( deaths == 0 ) {
-                    gameKD[i] = 0.0 + frags;
-                } else {
-                    gameKD[i] = 0.0 + ( frags / deaths );
-                }
             } else {
                 
-                PrintToConsoleAll("[OSAutoBalance]: 9:playerIsNotReal");
                 typeKD[i] = 0;
                 steamIds[i] = "";
                 shortIds[i] = "";
@@ -198,6 +178,19 @@ public void fetchPlayerData ( ) {
             PrintToConsoleAll("[OSAutoBalance]: 10");
 
         }
+        /* get player kills */
+        int frags = GetClientFrags ( i );
+
+        /* get player deaths */
+        int deaths = GetClientDeaths ( i );
+
+        /* calculate kd */
+        if ( deaths == 0 ) {
+            gameKD[i] = 0.0 + frags;
+        } else {
+            gameKD[i] = 0.0 + ( frags / deaths );
+        }
+
         PrintToConsoleAll("[OSAutoBalance]: 11:done:%s", nameKD[i]);
         PrintToConsoleAll("[OSAutoBalance]:   - databaseKD: %0.2f", databaseKD[i]);
         PrintToConsoleAll("[OSAutoBalance]:   - gameKD: %0.2f", gameKD[i]);
