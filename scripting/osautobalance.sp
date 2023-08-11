@@ -145,35 +145,35 @@ public void resetPlayerData ( int client ) {
 public void fetchPlayerData ( ) {
     char steamid[32];
     char shortSteamId[32];
-    PrintToChatAll("[OSAutoBalance]: 0:" );
+    PrintToConsoleAll("[OSAutoBalance]: 0:" );
 
     for ( int i = 1; i <= MAXPLAYERS; i++ ) {
         GetClientAuthId(i, AuthId_Steam2, steamid, sizeof(steamid));
-        PrintToChatAll("[OSAutoBalance]: 1:%s:%s:%i", nameKD[i], steamid, typeKD[i]);
+        PrintToConsoleAll("[OSAutoBalance]: 1:%s:%s:%i", nameKD[i], steamid, typeKD[i]);
         if ( typeKD[i] == 0 ) {
-            PrintToChatAll("[OSAutoBalance]: 2:%s",steamid);
+            PrintToConsoleAll("[OSAutoBalance]: 2:%s",steamid);
 
             if ( playerIsReal ( i ) ) {
-                PrintToChatAll("[OSAutoBalance]: 3:playerIsReal");
+                PrintToConsoleAll("[OSAutoBalance]: 3:playerIsReal");
                 
                 if ( isValidSteamID ( steamid ) ) {
-                    PrintToChatAll("[OSAutoBalance]: 4:isValidSteamID");
+                    PrintToConsoleAll("[OSAutoBalance]: 4:isValidSteamID");
                     strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
                     strcopy(steamIds[i], 32, steamid);
                     strcopy(shortIds[i], 32, shortSteamId);
-                    PrintToChatAll("[OSAutoBalance]: 5:Get KD for player %s", shortIds[i]);
+                    PrintToConsoleAll("[OSAutoBalance]: 5:Get KD for player %s", shortIds[i]);
                     databaseGetKD ( i );
                     typeKD[i] = 1;
                 } else {
-                    PrintToChatAll("[OSAutoBalance]: 6:isNotValidSteamID");
+                    PrintToConsoleAll("[OSAutoBalance]: 6:isNotValidSteamID");
                     typeKD[i] = 0;
                     steamIds[i] = "";
                     shortIds[i] = "";
-                    PrintToChatAll("[OSAutoBalance]: 7:Random KD for player %s", steamid);
+                    PrintToConsoleAll("[OSAutoBalance]: 7:Random KD for player %s", steamid);
                     /* random KD from database */
                     databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
                 }
-                PrintToChatAll("[OSAutoBalance]: 8:");
+                PrintToConsoleAll("[OSAutoBalance]: 8:");
                 /* get player kills */
                 int frags = GetClientFrags ( i );
 
@@ -188,32 +188,35 @@ public void fetchPlayerData ( ) {
                 }
             } else {
                 
-                PrintToChatAll("[OSAutoBalance]: 9:playerIsNotReal");
+                PrintToConsoleAll("[OSAutoBalance]: 9:playerIsNotReal");
                 typeKD[i] = 2;
                 steamIds[i] = "";
                 shortIds[i] = "";
                 /* random KD from database */
                 databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
             }
-            PrintToChatAll("[OSAutoBalance]: 10");
+            PrintToConsoleAll("[OSAutoBalance]: 10");
         }
-        PrintToChatAll("[OSAutoBalance]: 11:done");
+        PrintToConsoleAll("[OSAutoBalance]: 11:done");
     }
 }
 
 public void databaseGetKD ( int player ) {
+    PrintToConsoleAll("[databaseGetKD]: 0");
+
     checkConnection();
+    PrintToConsoleAll("[databaseGetKD]: 1");
     DBStatement stmt;
-    PrintToConsoleAll("[OSAutoBalance]: 0");
+    PrintToConsoleAll("[databaseGetKD]: 2");
 
-    PrintToConsoleAll("[OSAutoBalance]: Fetching KD for player %s", shortIds[player]);
+    PrintToConsoleAll("[databaseGetKD]: 3:Fetching KD for player %s", shortIds[player]);
 
-    PrintToConsoleAll("[OSAutoBalance]: 1");
+    PrintToConsoleAll("[databaseGetKD]: 4");
 
     if ( ( stmt = SQL_PrepareQuery ( mysql, "SELECT kd FROM player WHERE steamid = ?", error, sizeof(error) ) ) == null ) {
-        PrintToConsoleAll("[OSAutoBalance]: 2");
+        PrintToConsoleAll("[databaseGetKD]: 5");
         SQL_GetError ( mysql, error, sizeof(error));
-        PrintToConsoleAll("[OSAutoBalance]: Failed to prepare query[0x01] (error: %s)", error);
+        PrintToConsoleAll("[databaseGetKD]: 6:Failed to prepare query[0x01] (error: %s)", error);
         databaseKD[player] = 0.4;
         return;
     }
@@ -221,21 +224,22 @@ public void databaseGetKD ( int player ) {
     SQL_BindParamString ( stmt, 0, shortIds[player], false );
     if ( ! SQL_Execute ( stmt ) ) {
 
-        PrintToConsoleAll("[OSAutoBalance]: 3");
+        PrintToConsoleAll("[databaseGetKD]: 7");
         SQL_GetError ( mysql, error, sizeof(error));
-        PrintToConsoleAll("[OSAutoBalance]: Failed to query[0x02] (error: %s)", error);
+        PrintToConsoleAll("[databaseGetKD]: 8:Failed to query[0x02] (error: %s)", error);
         databaseKD[player] = 0.4;
         return;
     }
 
     if ( SQL_FetchRow ( stmt ) ) {
-        PrintToConsoleAll("[OSAutoBalance]: 4");
+        PrintToConsoleAll("[databaseGetKD]: 9");
         databaseKD[player] = SQL_FetchFloat ( stmt, 0 );
     } else {
-        PrintToConsoleAll("[OSAutoBalance]: 5");
+        PrintToConsoleAll("[databaseGetKD]: 10");
         databaseKD[player] = 0.4;
 
     }
+    PrintToConsoleAll("[databaseGetKD]: 11");
 
     if ( stmt != null ) {
         delete stmt;
