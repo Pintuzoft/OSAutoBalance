@@ -145,35 +145,37 @@ public void resetPlayerData ( int client ) {
 public void fetchPlayerData ( ) {
     char steamid[32];
     char shortSteamId[32];
+    PrintToConsoleAll("[OSAutoBalance]: 0:" );
 
     for ( int i = 1; i <= MAXPLAYERS; i++ ) {
+        PrintToConsoleAll("[OSAutoBalance]: 1:");
         if ( typeKD[i] == 0 ) {
             GetClientAuthId(i, AuthId_Engine, steamid, sizeof(steamid));
-            PrintToConsoleAll("[OSAutoBalance]: 0:%s",steamid);
+            PrintToConsoleAll("[OSAutoBalance]: 2:%s",steamid);
 
             if ( playerIsReal ( i ) ) {
-                PrintToConsoleAll("[OSAutoBalance]: 1:playerIsReal");
+                PrintToConsoleAll("[OSAutoBalance]: 3:playerIsReal");
                 
                 if ( isValidSteamID ( steamid ) ) {
-                    PrintToConsoleAll("[OSAutoBalance]: 2:isValidSteamID");
+                    PrintToConsoleAll("[OSAutoBalance]: 4:isValidSteamID");
                     strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
                     strcopy(steamIds[i], 32, steamid);
                     strcopy(shortIds[i], 32, shortSteamId);
-                    PrintToConsoleAll("[OSAutoBalance]: Get KD for player %s", shortIds[i]);
+                    PrintToConsoleAll("[OSAutoBalance]: 5:Get KD for player %s", shortIds[i]);
                     databaseGetKD ( i );
                     typeKD[i] = 1;
                 } else {
                     
-                    PrintToConsoleAll("[OSAutoBalance]: 3:isNotValidSteamID");
+                    PrintToConsoleAll("[OSAutoBalance]: 6:isNotValidSteamID");
 
                     typeKD[i] = 0;
                     steamIds[i] = "";
                     shortIds[i] = "";
-                    PrintToConsoleAll("[OSAutoBalance]: Random KD for player %s", steamid);
+                    PrintToConsoleAll("[OSAutoBalance]: 7:Random KD for player %s", steamid);
                     /* random KD from database */
                     databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
                 }
-                PrintToConsoleAll("[OSAutoBalance]: 4:");
+                PrintToConsoleAll("[OSAutoBalance]: 8:");
                 /* get player kills */
                 int frags = GetClientFrags ( i );
 
@@ -187,15 +189,16 @@ public void fetchPlayerData ( ) {
                     gameKD[i] = 0.0 + ( frags / deaths );
                 }
             } else {
-                PrintToConsoleAll("[OSAutoBalance]: 5:playerIsNotReal");
+                PrintToConsoleAll("[OSAutoBalance]: 9:playerIsNotReal");
                 typeKD[i] = 2;
                 steamIds[i] = "";
                 shortIds[i] = "";
                 /* random KD from database */
                 databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
             }
-            PrintToConsoleAll("[OSAutoBalance]: 6:done");
+            PrintToConsoleAll("[OSAutoBalance]: 10");
         }
+        PrintToConsoleAll("[OSAutoBalance]: 11:done");
     }
 }
 
@@ -204,14 +207,14 @@ public void databaseGetKD ( int player ) {
     DBStatement stmt;
     PrintToConsoleAll("[OSAutoBalance]: 0");
 
-    PrintToChatAll("[OSAutoBalance]: Fetching KD for player %s", shortIds[player]);
+    PrintToConsoleAll("[OSAutoBalance]: Fetching KD for player %s", shortIds[player]);
 
     PrintToConsoleAll("[OSAutoBalance]: 1");
 
     if ( ( stmt = SQL_PrepareQuery ( mysql, "SELECT kd FROM player WHERE steamid = ?", error, sizeof(error) ) ) == null ) {
         PrintToConsoleAll("[OSAutoBalance]: 2");
         SQL_GetError ( mysql, error, sizeof(error));
-        PrintToServer("[OSAutoBalance]: Failed to prepare query[0x01] (error: %s)", error);
+        PrintToConsoleAll("[OSAutoBalance]: Failed to prepare query[0x01] (error: %s)", error);
         databaseKD[player] = 0.4;
         return;
     }
@@ -221,7 +224,7 @@ public void databaseGetKD ( int player ) {
 
         PrintToConsoleAll("[OSAutoBalance]: 3");
         SQL_GetError ( mysql, error, sizeof(error));
-        PrintToServer("[OSAutoBalance]: Failed to query[0x02] (error: %s)", error);
+        PrintToConsoleAll("[OSAutoBalance]: Failed to query[0x02] (error: %s)", error);
         databaseKD[player] = 0.4;
         return;
     }
