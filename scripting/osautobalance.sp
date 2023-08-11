@@ -41,11 +41,11 @@ public Plugin myinfo = {
  
 public void OnPluginStart ( ) {
     databaseConnect();
+    EmulateMatchStart ( );
     HookEvent ( "round_start", Event_RoundStart );
     HookEvent ( "round_end", Event_RoundEnd );
     HookEvent ( "player_connect", Event_PlayerConnect );
     HookEvent ( "player_disconnect", Event_PlayerDisconnect );
-    EmulateMatchStart ( );
 }
 
 
@@ -91,6 +91,11 @@ public Action handleRoundEndFetchData ( Handle timer, int winTeam ) {
 
 public Action handleRoundEnd ( Handle timer, int winTeam ) {
     char name[32];
+    int t_count = 0;
+    float terrorists = 0.0;
+    int ct_count = 0;
+    float counterterrorists = 0.0;
+
     PrintToChatAll("[OSAutoBalance]: handleRoundEnd");
 
 //    checkConnection();
@@ -101,12 +106,25 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
             /* get player name */
             GetClientName ( i, name, sizeof(name) );
             PrintToConsoleAll("[OSAutoBalance]: %s:%s:%f:%i", name, shortIds[i], databaseKD[i], typeKD[i]);
+            if ( GetClientTeam(i) == CS_TEAM_CT ) {
+                ct_count++;
+                counterterrorists = counterterrorists + ((databaseKD[i]+gameKD[i])/2);
+                PrintToChatAll ( " - CT-value: %0.2f", counterterrorists);
+            } else if ( GetClientTeam(i) == CS_TEAM_T ) {
+                t_count++;
+                terrorists = terrorists + ((databaseKD[i]+gameKD[i])/2);
+                PrintToChatAll ( " - T-value: %0.2f", terrorists);
+            }
         }
     }
+
 
     return Plugin_Continue;
 
 }
+
+
+
 
 public void resetAllData ( ) {
     for ( int i = 1; i <= MAXPLAYERS; i++ ) {
