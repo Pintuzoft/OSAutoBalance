@@ -91,6 +91,8 @@ public Action handleRoundEndFetchData ( Handle timer, int winTeam ) {
 
 public Action handleRoundEnd ( Handle timer, int winTeam ) {
     char name[32];
+    PrintToChatAll("[OSAutoBalance]: handleRoundEnd");
+
 //    checkConnection();
 
     /* print all gathered player information */
