@@ -41,31 +41,25 @@ public Plugin myinfo = {
  
 public void OnPluginStart ( ) {
     databaseConnect();
-    resetAllData();
     HookEvent ( "round_start", Event_RoundStart );
     HookEvent ( "round_end", Event_RoundEnd );
     HookEvent ( "player_connect", Event_PlayerConnect );
     HookEvent ( "player_disconnect", Event_PlayerDisconnect );
-    HookEvent ( "announce_match_start", Event_MatchStart );
-
-    //HookEvent ( "announce_phase_end", Event_HalfTime );
+    EmulateMatchStart ( );
 }
 
-/* 
-On round end check team sizes and make sure 
-1 bomb site = T has 1 more player than CT
-2 bomb sites = CT has 1 more player than T
-3 bomb sites = CT has 1 more player than T
- */    
 
-public void Event_MatchStart ( Event event, const char[] name, bool dontBroadcast ) {
+public void OnPluginEnd ( ) {
+    databaseDisconnect();
+}
+
+public void EmulateMatchStart ( ) {
     setTeamWeight ( );
     resetAllData();
-    fetchPlayerData();
 }
 
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
-//    setTeamWeight ( );
+    //    setTeamWeight ( );
     //unShieldAllPlayers ( );
 
 }
@@ -73,6 +67,7 @@ public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcas
 public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast ) {
     setTeamWeight ( );
     int winTeam = GetEventInt(event, "winner");
+    CreateTimer ( 3.0, handleRoundEndFetchData, winTeam );
     CreateTimer ( 5.5, handleRoundEnd, winTeam );
 }
 
@@ -86,12 +81,17 @@ public void Event_PlayerDisconnect ( Event event, const char[] name, bool dontBr
     resetPlayerData ( client );
 }
 
-public Action handleRoundEnd ( Handle timer, int winTeam ) {
-    char name[32];
+public Action handleRoundEndFetchData ( Handle timer, int winTeam ) {
     checkConnection();
-
+    PrintToChatAll("[OSAutoBalance]: handleRoundEndFetchData");
     /* Gather player data */
     fetchPlayerData ( );
+    return Plugin_Continue;
+}
+
+public Action handleRoundEnd ( Handle timer, int winTeam ) {
+    char name[32];
+//    checkConnection();
 
     /* print all gathered player information */
     for ( int i=1; i < MAXPLAYERS; i++ ) {
@@ -258,6 +258,13 @@ public void databaseConnect() {
         PrintToServer("[OSAutoBalance]: Connected to mysql database!");
     } else {
         PrintToServer("[OSAutoBalance]: Failed to connect to mysql database! (error: %s)", error);
+    }
+}
+
+public void databaseDisconnect() {
+    if (mysql != null) {
+        delete mysql;
+        mysql = null;
     }
 }
 
