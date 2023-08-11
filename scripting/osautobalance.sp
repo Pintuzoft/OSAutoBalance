@@ -152,9 +152,9 @@ public void fetchPlayerData ( ) {
     PrintToConsoleAll("[OSAutoBalance]: 0:" );
 
     for ( int i = 1; i <= MAXPLAYERS; i++ ) {
-        PrintToConsoleAll("[OSAutoBalance]: 1:%s:%i", i, nameKD[i], typeKD[i]);
+        GetClientAuthId(i, AuthId_Engine, steamid, sizeof(steamid));
+        PrintToConsoleAll("[OSAutoBalance]: 1:%s:%s:%i", i, nameKD[i], steamid, typeKD[i]);
         if ( typeKD[i] == 0 ) {
-            GetClientAuthId(i, AuthId_Engine, steamid, sizeof(steamid));
             PrintToConsoleAll("[OSAutoBalance]: 2:%s",steamid);
 
             if ( playerIsReal ( i ) ) {
