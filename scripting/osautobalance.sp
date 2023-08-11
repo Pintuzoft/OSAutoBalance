@@ -149,7 +149,7 @@ public void fetchPlayerData ( ) {
 
     for ( int i = 1; i <= MAXPLAYERS; i++ ) {
         GetClientAuthId(i, AuthId_Steam2, steamid, sizeof(steamid));
-        PrintToConsoleAll("[OSAutoBalance]: 1:%s:%s:%i", nameKD[i], steamid, typeKD[i]);
+        PrintToConsoleAll("[OSAutoBalance]: 1:%s", nameKD[i]);
         if ( typeKD[i] == 0 ) {
             PrintToConsoleAll("[OSAutoBalance]: 2:%s",steamid);
 
@@ -189,15 +189,19 @@ public void fetchPlayerData ( ) {
             } else {
                 
                 PrintToConsoleAll("[OSAutoBalance]: 9:playerIsNotReal");
-                typeKD[i] = 2;
+                typeKD[i] = 0;
                 steamIds[i] = "";
                 shortIds[i] = "";
                 /* random KD from database */
                 databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
             }
             PrintToConsoleAll("[OSAutoBalance]: 10");
+
         }
-        PrintToConsoleAll("[OSAutoBalance]: 11:done");
+        PrintToConsoleAll("[OSAutoBalance]: 11:done:%s", nameKD[i]);
+        PrintToConsoleAll("[OSAutoBalance]:   - databaseKD: %0.2f", databaseKD[i]);
+        PrintToConsoleAll("[OSAutoBalance]:   - gameKD: %0.2f", gameKD[i]);
+        PrintToConsoleAll("[OSAutoBalance]:   - typeKD: %i", typeKD[i]);
     }
 }
 
