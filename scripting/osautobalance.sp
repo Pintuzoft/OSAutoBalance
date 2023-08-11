@@ -44,7 +44,8 @@ public Plugin myinfo = {
  
 public void OnPluginStart ( ) {
     databaseConnect();
-    EmulateMatchStart ( );
+    setTeamWeight ( );
+    resetAllData();
     HookEvent ( "round_start", Event_RoundStart );
     HookEvent ( "round_end", Event_RoundEnd );
     HookEvent ( "player_connect", Event_PlayerConnect );
@@ -54,11 +55,6 @@ public void OnPluginStart ( ) {
 
 public void OnPluginEnd ( ) {
     databaseDisconnect();
-}
-
-public void EmulateMatchStart ( ) {
-    setTeamWeight ( );
-    resetAllData();
 }
 
 public void Event_RoundStart ( Event event, const char[] name, bool dontBroadcast ) {
@@ -149,35 +145,35 @@ public void resetPlayerData ( int client ) {
 public void fetchPlayerData ( ) {
     char steamid[32];
     char shortSteamId[32];
-    PrintToConsoleAll("[OSAutoBalance]: 0:" );
+    PrintToChatAll("[OSAutoBalance]: 0:" );
 
     for ( int i = 1; i <= MAXPLAYERS; i++ ) {
         GetClientAuthId(i, AuthId_Steam2, steamid, sizeof(steamid));
-        PrintToConsoleAll("[OSAutoBalance]: 1:%s:%s:%i", i, nameKD[i], steamid, typeKD[i]);
+        PrintToChatAll("[OSAutoBalance]: 1:%s:%s:%i", i, nameKD[i], steamid, typeKD[i]);
         if ( typeKD[i] == 0 ) {
-            PrintToConsoleAll("[OSAutoBalance]: 2:%s",steamid);
+            PrintToChatAll("[OSAutoBalance]: 2:%s",steamid);
 
             if ( playerIsReal ( i ) ) {
-                PrintToConsoleAll("[OSAutoBalance]: 3:playerIsReal");
+                PrintToChatAll("[OSAutoBalance]: 3:playerIsReal");
                 
                 if ( isValidSteamID ( steamid ) ) {
-                    PrintToConsoleAll("[OSAutoBalance]: 4:isValidSteamID");
+                    PrintToChatAll("[OSAutoBalance]: 4:isValidSteamID");
                     strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
                     strcopy(steamIds[i], 32, steamid);
                     strcopy(shortIds[i], 32, shortSteamId);
-                    PrintToConsoleAll("[OSAutoBalance]: 5:Get KD for player %s", shortIds[i]);
+                    PrintToChatAll("[OSAutoBalance]: 5:Get KD for player %s", shortIds[i]);
                     databaseGetKD ( i );
                     typeKD[i] = 1;
                 } else {
-                    PrintToConsoleAll("[OSAutoBalance]: 6:isNotValidSteamID");
+                    PrintToChatAll("[OSAutoBalance]: 6:isNotValidSteamID");
                     typeKD[i] = 0;
                     steamIds[i] = "";
                     shortIds[i] = "";
-                    PrintToConsoleAll("[OSAutoBalance]: 7:Random KD for player %s", steamid);
+                    PrintToChatAll("[OSAutoBalance]: 7:Random KD for player %s", steamid);
                     /* random KD from database */
                     databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
                 }
-                PrintToConsoleAll("[OSAutoBalance]: 8:");
+                PrintToChatAll("[OSAutoBalance]: 8:");
                 /* get player kills */
                 int frags = GetClientFrags ( i );
 
@@ -191,16 +187,17 @@ public void fetchPlayerData ( ) {
                     gameKD[i] = 0.0 + ( frags / deaths );
                 }
             } else {
-                PrintToConsoleAll("[OSAutoBalance]: 9:playerIsNotReal");
+                
+                PrintToChatAll("[OSAutoBalance]: 9:playerIsNotReal");
                 typeKD[i] = 2;
                 steamIds[i] = "";
                 shortIds[i] = "";
                 /* random KD from database */
                 databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
             }
-            PrintToConsoleAll("[OSAutoBalance]: 10");
+            PrintToChatAll("[OSAutoBalance]: 10");
         }
-        PrintToConsoleAll("[OSAutoBalance]: 11:done");
+        PrintToChatAll("[OSAutoBalance]: 11:done");
     }
 }
 
