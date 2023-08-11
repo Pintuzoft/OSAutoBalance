@@ -165,9 +165,7 @@ public void fetchPlayerData ( ) {
                     databaseGetKD ( i );
                     typeKD[i] = 1;
                 } else {
-                    
                     PrintToConsoleAll("[OSAutoBalance]: 6:isNotValidSteamID");
-
                     typeKD[i] = 0;
                     steamIds[i] = "";
                     shortIds[i] = "";
