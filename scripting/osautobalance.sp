@@ -16,7 +16,7 @@ Handle mysql = null;
 int weight = CS_TEAM_CT;
 
 /* Name */
-char nameKD[MAXPLAYERS+1][32];
+char nameKD[MAXPLAYERS+1][64];
 
 /* KD from database */
 float databaseKD[MAXPLAYERS+1];
@@ -72,7 +72,10 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
 
 public void Event_PlayerConnect ( Event event, const char[] name, bool dontBroadcast ) {
     int client = GetEventInt(event, "userid");
+    char nameStr[64];
     resetPlayerData ( client );
+    GetClientName ( client, nameStr, 64 );
+    strcopy(nameKD[client], 64, nameStr);
 }
 
 public void Event_PlayerDisconnect ( Event event, const char[] name, bool dontBroadcast ) {
@@ -89,7 +92,6 @@ public Action handleRoundEndFetchData ( Handle timer, int winTeam ) {
 }
 
 public Action handleRoundEnd ( Handle timer, int winTeam ) {
-    char nameStr[32];
     int t_count = 0;
     float terrorists = 0.0;
     int ct_count = 0;
@@ -103,7 +105,6 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
     for ( int i=1; i <= MAXPLAYERS; i++ ) {
         if ( IsClientConnected ( i ) && ! IsClientSourceTV ( i ) ) {
             /* get player name */
-            GetClientName ( i, nameKD[i], 32 );
             PrintToConsoleAll("[OSAutoBalance]: %s:%s:%f:%i", nameKD[i], shortIds[i], databaseKD[i], typeKD[i]);
             if ( GetClientTeam(i) == CS_TEAM_CT ) {
                 ct_count++;
@@ -147,13 +148,53 @@ public void fetchPlayerData ( ) {
     char shortSteamId[32];
     PrintToConsoleAll("[OSAutoBalance]: 0:" );
 
-    for ( int i = 1; i <= MAXPLAYERS; i++ ) {
+    for ( int player = 1; player <= MAXPLAYERS; player++ ) {
+        PrintToConsoleAll("[OSAutoBalance]: %i:", player );
+
+        if ( IsClientConnected(player) && ! IsClientSourceTV(player) ) {
+            
+            if ( playerIsReal ( player ) ) {
+                if ( typeKD[player] == 0 ) {
+                    GetClientAuthId(player, AuthId_Steam2, steamid, sizeof(steamid));
+                    if ( isValidSteamID ( steamid ) ) {
+                        strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
+                        strcopy(steamIds[player], 32, steamid);
+                        strcopy(shortIds[player], 32, shortSteamId);
+                        databaseGetKD ( player );
+                        typeKD[player] = 1;
+                    } else {
+                        gameKD[player] = 0.6;
+                    }
+                }
+            } else {
+                typeKD[player] = 2;
+                gameKD[player] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
+            }
+            
+
+
+        }
+        int frags = GetClientFrags ( player );
+        int deaths = GetClientDeaths ( player );
+        if ( deaths == 0 ) {
+            gameKD[player] = 0.0 + frags;
+        } else {
+            gameKD[player] = 0.0 + ( frags / deaths );
+        }
+
+        PrintToConsoleAll("[OSAutoBalance]: %i:done:%s", player, nameKD[player]);
+        PrintToConsoleAll("[OSAutoBalance]:   - databaseKD: %0.2f", databaseKD[player]);
+        PrintToConsoleAll("[OSAutoBalance]:   - gameKD: %0.2f", gameKD[player]);
+        PrintToConsoleAll("[OSAutoBalance]:   - typeKD: %i", typeKD[player]);
+    }
+
+
+/*
         PrintToConsoleAll("[OSAutoBalance]: 1:");
         GetClientAuthId(i, AuthId_Steam2, steamid, sizeof(steamid));
         PrintToConsoleAll("[OSAutoBalance]: 2:%i:%s", i, nameKD[i]);
         if ( typeKD[i] == 0 ) {
 
-            // DatabaseKD
             if ( playerIsReal ( i ) ) {
                 
                 if ( isValidSteamID ( steamid ) ) {
@@ -166,28 +207,22 @@ public void fetchPlayerData ( ) {
                     typeKD[i] = 0;
                     steamIds[i] = "";
                     shortIds[i] = "";
-                    /* random KD from database */
                     databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
                 }
             } else {
                 typeKD[i] = 0;
                 steamIds[i] = "";
                 shortIds[i] = "";
-                /* random KD from database */
                 databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
             }
 
         }
 
-        // GameKD
 
-        /* get player kills */
         int frags = GetClientFrags ( i );
 
-        /* get player deaths */
         int deaths = GetClientDeaths ( i );
 
-        /* calculate kd */
         if ( deaths == 0 ) {
             gameKD[i] = 0.0 + frags;
         } else {
@@ -199,6 +234,7 @@ public void fetchPlayerData ( ) {
         PrintToConsoleAll("[OSAutoBalance]:   - gameKD: %0.2f", gameKD[i]);
         PrintToConsoleAll("[OSAutoBalance]:   - typeKD: %i", typeKD[i]);
     }
+    */
 }
 
 public void databaseGetKD ( int player ) {
