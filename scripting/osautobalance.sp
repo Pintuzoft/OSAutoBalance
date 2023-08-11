@@ -15,6 +15,9 @@ Handle mysql = null;
 
 int weight = CS_TEAM_CT;
 
+/* Name */
+char nameKD[MAXPLAYERS+1][32];
+
 /* KD from database */
 float databaseKD[MAXPLAYERS+1];
 
@@ -90,7 +93,7 @@ public Action handleRoundEndFetchData ( Handle timer, int winTeam ) {
 }
 
 public Action handleRoundEnd ( Handle timer, int winTeam ) {
-    char name[32];
+    char nameStr[32];
     int t_count = 0;
     float terrorists = 0.0;
     int ct_count = 0;
@@ -104,8 +107,8 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
     for ( int i=1; i <= MAXPLAYERS; i++ ) {
         if ( IsClientConnected ( i ) && ! IsClientSourceTV ( i ) ) {
             /* get player name */
-            GetClientName ( i, name, sizeof(name) );
-            PrintToConsoleAll("[OSAutoBalance]: %s:%s:%f:%i", name, shortIds[i], databaseKD[i], typeKD[i]);
+            GetClientName ( i, nameKD[i], 32 );
+            PrintToConsoleAll("[OSAutoBalance]: %s:%s:%f:%i", nameKD[i], shortIds[i], databaseKD[i], typeKD[i]);
             if ( GetClientTeam(i) == CS_TEAM_CT ) {
                 ct_count++;
                 counterterrorists = counterterrorists + ((databaseKD[i]+gameKD[i])/2);
@@ -134,6 +137,7 @@ public void resetAllData ( ) {
 
 
 public void resetPlayerData ( int client ) {
+    nameKD[client] = "";
     steamIds[client] = "";
     shortIds[client] = "";
     databaseKD[client] = 0.0;
@@ -148,7 +152,7 @@ public void fetchPlayerData ( ) {
     PrintToConsoleAll("[OSAutoBalance]: 0:" );
 
     for ( int i = 1; i <= MAXPLAYERS; i++ ) {
-        PrintToConsoleAll("[OSAutoBalance]: 1:%d:%d", i, typeKD[i]);
+        PrintToConsoleAll("[OSAutoBalance]: 1:%s:%i", i, nameKD[i], typeKD[i]);
         if ( typeKD[i] == 0 ) {
             GetClientAuthId(i, AuthId_Engine, steamid, sizeof(steamid));
             PrintToConsoleAll("[OSAutoBalance]: 2:%s",steamid);
