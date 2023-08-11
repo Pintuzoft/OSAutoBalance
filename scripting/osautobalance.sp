@@ -101,7 +101,7 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
 //    checkConnection();
 
     /* print all gathered player information */
-    for ( int i=1; i < MAXPLAYERS; i++ ) {
+    for ( int i=1; i <= MAXPLAYERS; i++ ) {
         if ( IsClientConnected ( i ) && ! IsClientSourceTV ( i ) ) {
             /* get player name */
             GetClientName ( i, name, sizeof(name) );
