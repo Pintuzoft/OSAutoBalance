@@ -149,7 +149,7 @@ public void fetchPlayerData ( ) {
 
     for ( int i = 1; i <= MAXPLAYERS; i++ ) {
         GetClientAuthId(i, AuthId_Steam2, steamid, sizeof(steamid));
-        PrintToChatAll("[OSAutoBalance]: 1:%s:%s:%i", i, nameKD[i], steamid, typeKD[i]);
+        PrintToChatAll("[OSAutoBalance]: 1:%s:%s:%i", nameKD[i], steamid, typeKD[i]);
         if ( typeKD[i] == 0 ) {
             PrintToChatAll("[OSAutoBalance]: 2:%s",steamid);
 
