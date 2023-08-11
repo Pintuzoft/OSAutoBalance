@@ -151,29 +151,28 @@ public void fetchPlayerData ( ) {
     for ( int player = 1; player <= MAXPLAYERS; player++ ) {
         PrintToConsoleAll("[OSAutoBalance]: %i:", player );
 
-        if ( IsClientConnected(player) && ! IsClientSourceTV(player) ) {
-            
-            if ( playerIsReal ( player ) ) {
-                if ( typeKD[player] == 0 ) {
-                    GetClientAuthId(player, AuthId_Steam2, steamid, sizeof(steamid));
-                    if ( isValidSteamID ( steamid ) ) {
-                        strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
-                        strcopy(steamIds[player], 32, steamid);
-                        strcopy(shortIds[player], 32, shortSteamId);
-                        databaseGetKD ( player );
-                        typeKD[player] = 1;
-                    } else {
-                        gameKD[player] = 0.6;
-                    }
-                }
-            } else {
-                typeKD[player] = 2;
-                gameKD[player] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
-            }
-            
 
+        if ( IsFakeClient ( player ) ) {
+            /* BOT */
+            typeKD[player] = 2;
+            gameKD[player] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
+        } else {
+            /* HUMAN */
+            if ( typeKD[player] == 0 ) {
+                GetClientAuthId(player, AuthId_Steam2, steamid, sizeof(steamid));
+                if ( isValidSteamID ( steamid ) ) {
+                    strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
+                    strcopy(steamIds[player], 32, steamid);
+                    strcopy(shortIds[player], 32, shortSteamId);
+                    databaseGetKD ( player );
+                    typeKD[player] = 1;
+                } else {
+                    gameKD[player] = 0.6;
+                }
+            }
 
         }
+
         int frags = GetClientFrags ( player );
         int deaths = GetClientDeaths ( player );
         if ( deaths == 0 ) {
