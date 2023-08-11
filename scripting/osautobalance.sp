@@ -151,11 +151,11 @@ public void fetchPlayerData ( ) {
     for ( int player = 1; player <= MAXPLAYERS; player++ ) {
         PrintToConsoleAll("[OSAutoBalance]: %i:", player );
 
-
         if ( IsFakeClient ( player ) ) {
             /* BOT */
-            typeKD[player] = 2;
-            gameKD[player] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
+            if ( gameKD[player] == 0.0 ) {
+                gameKD[player] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
+            }
         } else {
             /* HUMAN */
             if ( typeKD[player] == 0 ) {
