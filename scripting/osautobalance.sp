@@ -155,29 +155,21 @@ public void fetchPlayerData ( ) {
         if (!IsClientConnected(player)) {
             continue;  // Skip to the next player if the current one isn't connected
         }
-        if ( IsFakeClient ( player ) ) {
-            /* BOT */
-            if ( gameKD[player] == 0.0 ) {
-                databaseKD[player] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
-                typeKD[player] = 2;
+      
+        if ( typeKD[player] == 0 ) {
+            GetClientAuthId(player, AuthId_Steam2, steamid, sizeof(steamid));
+            if ( isValidSteamID ( steamid ) ) {
+                strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
+                strcopy(steamIds[player], 32, steamid);
+                strcopy(shortIds[player], 32, shortSteamId);
+                databaseGetKD ( player );
+                typeKD[player] = 1;
+            } else {
+                gameKD[player] = 0.6;
             }
-        } else {
-            /* HUMAN */
-            if ( typeKD[player] == 0 ) {
-                GetClientAuthId(player, AuthId_Steam2, steamid, sizeof(steamid));
-                if ( isValidSteamID ( steamid ) ) {
-                    strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
-                    strcopy(steamIds[player], 32, steamid);
-                    strcopy(shortIds[player], 32, shortSteamId);
-                    databaseGetKD ( player );
-                    typeKD[player] = 1;
-                } else {
-                    gameKD[player] = 0.6;
-                }
-            }
-
         }
 
+      
         int frags = GetClientFrags ( player );
         int deaths = GetClientDeaths ( player );
         if ( deaths == 0 ) {
