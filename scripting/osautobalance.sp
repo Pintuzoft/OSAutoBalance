@@ -18,6 +18,9 @@ int weight = CS_TEAM_CT;
 /* Name */
 char nameKD[MAXPLAYERS+1][64];
 
+/* Player teams */
+int team[MAXPLAYERS+1];
+
 /* Player steamids */
 char steamIds[MAXPLAYERS+1][32];
 
@@ -113,16 +116,14 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
             GetClientName ( i, nameStr, 64 );
             strcopy(nameKD[i], 64, nameStr);
             
-//            PrintToConsoleAll("[OSAutoBalance]: %s:%s:%i", nameKD[i], shortIds[i], typeKD[i]);
-//            PrintToConsoleAll("[OSAutoBalance]:  - dbKD: %0.2f", dbKD[i]);
-//            PrintToConsoleAll("[OSAutoBalance]:  - gameKD: %0.2f", gameKD[i]);
-//            PrintToConsoleAll("[OSAutoBalance]:  - avgKD: %0.2f", avgKD);
             if ( GetClientTeam(i) == CS_TEAM_CT ) {
+                team[i] = CS_TEAM_CT;
                 ct_count++;
                 counterterrorists = counterterrorists + ((dbKD[i]+gameKD[i])/2);
                 PrintToChatAll ( " - CT-value: %0.2f", counterterrorists);
             } else if ( GetClientTeam(i) == CS_TEAM_T ) {
                 t_count++;
+                team[i] = CS_TEAM_T;
                 terrorists = terrorists + ((dbKD[i]+gameKD[i])/2);
                 PrintToChatAll ( " - T-value: %0.2f", terrorists);
             }
@@ -166,9 +167,54 @@ public void calculateAverageKD ( ) {
                 PrintToConsoleAll(" - Weights -> Historical: %f, Game: %f", histWeight, currWeight);
                 PrintToConsoleAll(" - Average KD: %f", avgKD[player]);
             }
-            PrintToConsoleAll("Player %s | -----------------------------", nameKD[player]);
+            PrintToConsoleAll("-----------------------------");
         }
     }
+}
+
+public void compareTeams ( ) {
+    float team1TotalKD = 0.0;
+    float team2TotalKD = 0.0;
+
+    int team1Players = 0;
+    int team2Players = 0;
+
+    for (int player = 1; player <= MAXPLAYERS; player++) {
+        if ( ! IsClientConnected(player) ) {
+            continue;
+        }
+
+        if ( team[player] == 1 ) {
+            team1TotalKD += avgKD[player];
+            team1Players++;
+
+        } else if ( team[player] == 2 ) {
+            team2TotalKD += avgKD[player];
+            team2Players++;
+        }
+    }
+
+    // Without considering player weight
+    float team1AvgWithoutWeight = team1Players ? team1TotalKD / team1Players : 0.0;
+    float team2AvgWithoutWeight = team2Players ? team2TotalKD / team2Players : 0.0;
+
+    PrintToConsoleAll("Without Player Weight:");
+    PrintToConsoleAll(" - Team 1 Avg KD: %f", team1AvgWithoutWeight);
+    PrintToConsoleAll(" - Team 2 Avg KD: %f", team2AvgWithoutWeight);
+    PrintToConsoleAll("-----------------------------");
+
+    // With considering player weight
+    int totalPlayers = team1Players + team2Players;
+    float playerWeightForTeam1 = 1.0 * totalPlayers / (team1Players ? team1Players : 1);
+    float playerWeightForTeam2 = 1.0 * totalPlayers / (team2Players ? team2Players : 1);
+
+    float team1AvgWithWeight = team1TotalKD * playerWeightForTeam1 / team1Players;
+    float team2AvgWithWeight = team2TotalKD * playerWeightForTeam2 / team2Players;
+
+    PrintToConsoleAll("With Player Weight:");
+    PrintToConsoleAll(" - Team 1 Avg KD: %f", team1AvgWithWeight);
+    PrintToConsoleAll(" - Team 2 Avg KD: %f", team2AvgWithWeight);
+    PrintToConsoleAll("-----------------------------");
 }
 
 
