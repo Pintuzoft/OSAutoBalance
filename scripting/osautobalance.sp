@@ -95,6 +95,7 @@ public Action handleRoundEndFetchData ( Handle timer, int winTeam ) {
     /* Gather player data */
     fetchPlayerData ( );
     calculateAverageKD ( );
+    compareTeams ( );
     return Plugin_Continue;
 }
 
@@ -227,6 +228,7 @@ public void resetAllData ( ) {
 
 public void resetPlayerData ( int client ) {
     nameKD[client] = "";
+    team[client] = 0;
     steamIds[client] = "";
     shortIds[client] = "";
     dbKD[client] = 0.0;
