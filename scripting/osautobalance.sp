@@ -163,7 +163,9 @@ public void fetchPlayerData ( ) {
             strcopy(steamIds[player], 32, steamid);
             strcopy(shortIds[player], 32, shortSteamId);
             databaseGetKD ( player );
-            typeKD[player] = 1;
+            if ( isValidSteamID ( steamid ) ) {
+                typeKD[player] = 1;
+            } 
             //} else {
             //    gameKD[player] = 0.6;
             //}
