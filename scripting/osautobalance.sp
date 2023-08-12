@@ -108,26 +108,36 @@ public void evenTeams ( ) {
     float t_kd_sum = 0.0;
     int worstPlayer = -1;
     float worstKD = 9999999.0; // Some large value for initial comparison
-
+PrintToConsoleAll("[OSAutoBalance]: 0:");
     // 1. Calculate the total KD for each team & identify the worst player
     for (int i = 0; i < MAXPLAYERS; i++) {
+PrintToConsoleAll("[OSAutoBalance]: 1:");
         if (!IsClientConnected(i)) continue;
         
+PrintToConsoleAll("[OSAutoBalance]: 2:");
         if (team[i] == CS_TEAM_CT) {
+PrintToConsoleAll("[OSAutoBalance]: 3:");
             ct_kd_sum += avgKD[i];
             if (avgKD[i] < worstKD) {
+PrintToConsoleAll("[OSAutoBalance]: 4:");
                 worstKD = avgKD[i];
                 worstPlayer = i;
             }
+PrintToConsoleAll("[OSAutoBalance]: 5:");
         } else if (team[i] == CS_TEAM_T) {
+PrintToConsoleAll("[OSAutoBalance]: 6:");
             t_kd_sum += avgKD[i];
             if (avgKD[i] < worstKD) {
+PrintToConsoleAll("[OSAutoBalance]: 7:");
                 worstKD = avgKD[i];
                 worstPlayer = i;
             }
+PrintToConsoleAll("[OSAutoBalance]: 8:");
         }
+PrintToConsoleAll("[OSAutoBalance]: 9:");
     }
 
+PrintToConsoleAll("[OSAutoBalance]: 10:");
     int teamSizeDifference = absoluteValue(ct_count - t_count);
     if (teamSizeDifference <= 1) return;
 
@@ -137,22 +147,32 @@ public void evenTeams ( ) {
 
     int foundPlayers = 0;
     for (int i = 0; i < MAXPLAYERS && foundPlayers < playersToMove; i++) {
+PrintToConsoleAll("[OSAutoBalance]: 11:");
         if (!IsClientConnected(i)) continue;
+PrintToConsoleAll("[OSAutoBalance]: 12:");
         if (team[i] != largerTeam) continue;
+PrintToConsoleAll("[OSAutoBalance]: 13:");
 
         if (absoluteValueFloat(kdDifference - avgKD[i]) <= kdDifference/playersToMove) {
+PrintToConsoleAll("[OSAutoBalance]: 14:");
             PrintToChatAll("Suggest moving player %d to balance teams. Team KD Gap: %.2f, Player KD: %.2f", 
                        i, kdDifference, avgKD[i]);
             kdDifference -= avgKD[i];
             foundPlayers++;
+PrintToConsoleAll("[OSAutoBalance]: 15:");
         }
+PrintToConsoleAll("[OSAutoBalance]: 16:");
     }
+PrintToConsoleAll("[OSAutoBalance]: 17:");
 
     // Fallback: If we didn't find enough players, suggest the worst player
     if (foundPlayers < playersToMove && worstPlayer != -1) {
+PrintToConsoleAll("[OSAutoBalance]: 18:");
         PrintToChatAll("Fallback: Suggest moving player %d with KD %.2f to balance teams.", 
                    worstPlayer, worstKD);
+PrintToConsoleAll("[OSAutoBalance]: 19:");
     }
+PrintToConsoleAll("[OSAutoBalance]: 20:");
 }
 public void calculateAverageKD ( ) {
     t_count = 0;
