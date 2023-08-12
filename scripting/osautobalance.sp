@@ -102,7 +102,7 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
 //    checkConnection();
 
     /* print all gathered player information */
-    for ( int i=1; i <= MAXPLAYERS; i++ ) {
+    for ( int i = 1; i < MAXPLAYERS; i++ ) {
         if ( IsClientConnected ( i ) && ! IsClientSourceTV ( i ) ) {
             /* get player name */
             GetClientName ( i, nameStr, 64 );
@@ -129,7 +129,7 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
 
 
 public void resetAllData ( ) {
-    for ( int i = 1; i <= MAXPLAYERS; i++ ) {
+    for ( int i = 1; i < MAXPLAYERS; i++ ) {
         resetPlayerData ( i );
     }
 }
@@ -150,7 +150,7 @@ public void fetchPlayerData ( ) {
     char shortSteamId[32];
     PrintToConsoleAll("[OSAutoBalance]: 0:" );
 
-    for ( int player = 1; player <= MAXPLAYERS; player++ ) {
+    for ( int player = 1; player < MAXPLAYERS; player++ ) {
         PrintToConsoleAll("[OSAutoBalance]: 1:%i:", player );
         if (!IsClientConnected(player)) {
             continue;  // Skip to the next player if the current one isn't connected
