@@ -206,8 +206,13 @@ public void compareTeams ( ) {
 
     // With considering player weight
     int totalPlayers = team1Players + team2Players;
+    PrintToConsoleAll("Team 1 Player Count: %d", team1Players);
+    PrintToConsoleAll("Team 2 Player Count: %d", team2Players);
     float playerWeightForTeam1 = 1.0 * totalPlayers / (team1Players ? team1Players : 1);
     float playerWeightForTeam2 = 1.0 * totalPlayers / (team2Players ? team2Players : 1);
+
+    PrintToConsoleAll("Player Weight for Team 1: %f", playerWeightForTeam1);
+    PrintToConsoleAll("Player Weight for Team 2: %f", playerWeightForTeam2);
 
     float team1AvgWithWeight = team1TotalKD * playerWeightForTeam1 / team1Players;
     float team2AvgWithWeight = team2TotalKD * playerWeightForTeam2 / team2Players;
