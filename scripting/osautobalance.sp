@@ -158,15 +158,15 @@ public void fetchPlayerData ( ) {
       
         if ( typeKD[player] == 0 ) {
             GetClientAuthId(player, AuthId_Steam2, steamid, sizeof(steamid));
-            if ( isValidSteamID ( steamid ) ) {
-                strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
-                strcopy(steamIds[player], 32, steamid);
-                strcopy(shortIds[player], 32, shortSteamId);
-                databaseGetKD ( player );
-                typeKD[player] = 1;
-            } else {
-                gameKD[player] = 0.6;
-            }
+            //if ( isValidSteamID ( steamid ) ) {
+            strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
+            strcopy(steamIds[player], 32, steamid);
+            strcopy(shortIds[player], 32, shortSteamId);
+            databaseGetKD ( player );
+            typeKD[player] = 1;
+            //} else {
+            //    gameKD[player] = 0.6;
+            //}
         }
 
       
@@ -187,44 +187,30 @@ public void fetchPlayerData ( ) {
 }
 
 public void databaseGetKD ( int player ) {
-    PrintToConsoleAll("[databaseGetKD]: 0");
-
     checkConnection();
-    PrintToConsoleAll("[databaseGetKD]: 1");
     DBStatement stmt;
-    PrintToConsoleAll("[databaseGetKD]: 2");
-
-    PrintToConsoleAll("[databaseGetKD]: 3:Fetching KD for player %s", shortIds[player]);
-
-    PrintToConsoleAll("[databaseGetKD]: 4");
 
     if ( ( stmt = SQL_PrepareQuery ( mysql, "SELECT kd FROM player WHERE steamid = ?", error, sizeof(error) ) ) == null ) {
-        PrintToConsoleAll("[databaseGetKD]: 5");
         SQL_GetError ( mysql, error, sizeof(error));
-        PrintToConsoleAll("[databaseGetKD]: 6:Failed to prepare query[0x01] (error: %s)", error);
+        PrintToConsoleAll("[databaseGetKD]: Failed to prepare query[0x01] (error: %s)", error);
         databaseKD[player] = 0.4;
         return;
     }
 
     SQL_BindParamString ( stmt, 0, shortIds[player], false );
     if ( ! SQL_Execute ( stmt ) ) {
-
-        PrintToConsoleAll("[databaseGetKD]: 7");
         SQL_GetError ( mysql, error, sizeof(error));
-        PrintToConsoleAll("[databaseGetKD]: 8:Failed to query[0x02] (error: %s)", error);
+        PrintToConsoleAll("[databaseGetKD]: Failed to query[0x02] (error: %s)", error);
         databaseKD[player] = 0.4;
         return;
     }
 
     if ( SQL_FetchRow ( stmt ) ) {
-        PrintToConsoleAll("[databaseGetKD]: 9");
         databaseKD[player] = SQL_FetchFloat ( stmt, 0 );
     } else {
-        PrintToConsoleAll("[databaseGetKD]: 10");
         databaseKD[player] = 0.4;
 
     }
-    PrintToConsoleAll("[databaseGetKD]: 11");
 
     if ( stmt != null ) {
         delete stmt;
