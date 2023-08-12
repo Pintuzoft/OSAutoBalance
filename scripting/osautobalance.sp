@@ -110,7 +110,7 @@ public void evenTeams ( ) {
     float worstKD = 9999999.0; // Some large value for initial comparison
 PrintToConsoleAll("[OSAutoBalance]: 0:");
     // 1. Calculate the total KD for each team & identify the worst player
-    for (int i = 0; i < MAXPLAYERS; i++) {
+    for (int i = 1; i < MAXPLAYERS; i++) {
 PrintToConsoleAll("[OSAutoBalance]: 1:");
         if ( ! IsClientConnected ( i ) || IsClientSourceTV ( i )) continue;
         
@@ -146,7 +146,7 @@ PrintToConsoleAll("[OSAutoBalance]: 10:");
     int largerTeam = (ct_count > t_count) ? CS_TEAM_CT : CS_TEAM_T;
 
     int foundPlayers = 0;
-    for (int i = 0; i < MAXPLAYERS && foundPlayers < playersToMove; i++) {
+    for (int i = 1; i < MAXPLAYERS && foundPlayers < playersToMove; i++) {
 PrintToConsoleAll("[OSAutoBalance]: 11:");
         if ( ! IsClientConnected ( i ) || IsClientSourceTV ( i )) continue;
 PrintToConsoleAll("[OSAutoBalance]: 12:");
