@@ -151,39 +151,61 @@ public void fetchPlayerData ( ) {
     PrintToConsoleAll("[OSAutoBalance]: 0:" );
 
     for ( int player = 1; player <= MAXPLAYERS; player++ ) {
-        PrintToConsoleAll("[OSAutoBalance]: %i:", player );
+        PrintToConsoleAll("[OSAutoBalance]: 1:%i:", player );
         
         if ( IsFakeClient ( player ) ) {
+    PrintToConsoleAll("[OSAutoBalance]: 2:" );
             /* BOT */
             if ( gameKD[player] == 0.0 ) {
+    PrintToConsoleAll("[OSAutoBalance]: 3:" );
                 gameKD[player] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
             }
+    PrintToConsoleAll("[OSAutoBalance]: 4:" );
         } else {
+    PrintToConsoleAll("[OSAutoBalance]: 5:" );
             /* HUMAN */
             if ( typeKD[player] == 0 ) {
+    PrintToConsoleAll("[OSAutoBalance]: 6:" );
                 GetClientAuthId(player, AuthId_Steam2, steamid, sizeof(steamid));
+    PrintToConsoleAll("[OSAutoBalance]: 7:" );
                 if ( isValidSteamID ( steamid ) ) {
+    PrintToConsoleAll("[OSAutoBalance]: 8:" );
                     strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
+    PrintToConsoleAll("[OSAutoBalance]: 9:" );
                     strcopy(steamIds[player], 32, steamid);
+    PrintToConsoleAll("[OSAutoBalance]: 10:" );
                     strcopy(shortIds[player], 32, shortSteamId);
+    PrintToConsoleAll("[OSAutoBalance]: 11:" );
                     databaseGetKD ( player );
+    PrintToConsoleAll("[OSAutoBalance]: 12:" );
                     typeKD[player] = 1;
+    PrintToConsoleAll("[OSAutoBalance]: 13:" );
                 } else {
+    PrintToConsoleAll("[OSAutoBalance]: 14:" );
                     gameKD[player] = 0.6;
+    PrintToConsoleAll("[OSAutoBalance]: 15:" );
                 }
+    PrintToConsoleAll("[OSAutoBalance]: 16:" );
             }
+    PrintToConsoleAll("[OSAutoBalance]: 17:" );
 
         }
 
+    PrintToConsoleAll("[OSAutoBalance]: 18:" );
         int frags = GetClientFrags ( player );
+    PrintToConsoleAll("[OSAutoBalance]: 19:" );
         int deaths = GetClientDeaths ( player );
+    PrintToConsoleAll("[OSAutoBalance]: 20:" );
         if ( deaths == 0 ) {
+    PrintToConsoleAll("[OSAutoBalance]: 21:" );
             gameKD[player] = 0.0 + frags;
         } else {
+    PrintToConsoleAll("[OSAutoBalance]: 22:" );
             gameKD[player] = 0.0 + ( frags / deaths );
         }
+    PrintToConsoleAll("[OSAutoBalance]: 23:" );
 
-        PrintToConsoleAll("[OSAutoBalance]: %i:done:%s", player, nameKD[player]);
+        PrintToConsoleAll("[OSAutoBalance]: 24:%i:done:%s", player, nameKD[player]);
         PrintToConsoleAll("[OSAutoBalance]:   - databaseKD: %0.2f", databaseKD[player]);
         PrintToConsoleAll("[OSAutoBalance]:   - gameKD: %0.2f", gameKD[player]);
         PrintToConsoleAll("[OSAutoBalance]:   - typeKD: %i", typeKD[player]);
