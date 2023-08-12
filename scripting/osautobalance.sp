@@ -185,11 +185,11 @@ public void compareTeams ( ) {
             continue;
         }
 
-        if ( team[player] == 1 ) {
+        if ( team[player] == CS_TEAM_T ) {
             team1TotalKD += avgKD[player];
             team1Players++;
 
-        } else if ( team[player] == 2 ) {
+        } else if ( team[player] == CS_TEAM_CT ) {
             team2TotalKD += avgKD[player];
             team2Players++;
         }
