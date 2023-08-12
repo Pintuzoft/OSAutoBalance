@@ -72,10 +72,9 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
 
 public void Event_PlayerConnect ( Event event, const char[] name, bool dontBroadcast ) {
     int client = GetEventInt(event, "userid");
-    char nameStr[64];
+    
     resetPlayerData ( client );
-    GetClientName ( client, nameStr, 64 );
-    strcopy(nameKD[client], 64, nameStr);
+    
 }
 
 public void Event_PlayerDisconnect ( Event event, const char[] name, bool dontBroadcast ) {
@@ -92,6 +91,7 @@ public Action handleRoundEndFetchData ( Handle timer, int winTeam ) {
 }
 
 public Action handleRoundEnd ( Handle timer, int winTeam ) {
+    char nameStr[64];
     int t_count = 0;
     float terrorists = 0.0;
     int ct_count = 0;
@@ -105,6 +105,8 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
     for ( int i=1; i <= MAXPLAYERS; i++ ) {
         if ( IsClientConnected ( i ) && ! IsClientSourceTV ( i ) ) {
             /* get player name */
+            GetClientName ( i, nameStr, 64 );
+            strcopy(nameKD[i], 64, nameStr);
             PrintToConsoleAll("[OSAutoBalance]: %s:%s:%f:%i", nameKD[i], shortIds[i], databaseKD[i], typeKD[i]);
             if ( GetClientTeam(i) == CS_TEAM_CT ) {
                 ct_count++;
@@ -150,7 +152,7 @@ public void fetchPlayerData ( ) {
 
     for ( int player = 1; player <= MAXPLAYERS; player++ ) {
         PrintToConsoleAll("[OSAutoBalance]: %i:", player );
-
+        
         if ( IsFakeClient ( player ) ) {
             /* BOT */
             if ( gameKD[player] == 0.0 ) {
