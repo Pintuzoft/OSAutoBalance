@@ -173,9 +173,9 @@ public void fetchPlayerData ( ) {
         int frags = GetClientFrags ( player );
         int deaths = GetClientDeaths ( player );
         if ( deaths == 0 ) {
-            gameKD[player] = 0.0 + frags;
+            gameKD[player] = 1.0 * frags;
         } else {
-            gameKD[player] = 0.0 + ( frags / deaths );
+            gameKD[player] = 1.0 * frags / deaths;
         }
 
         PrintToConsoleAll("[OSAutoBalance]: 24:%i:done:%s", player, nameKD[player]);
