@@ -152,7 +152,9 @@ public void fetchPlayerData ( ) {
 
     for ( int player = 1; player <= MAXPLAYERS; player++ ) {
         PrintToConsoleAll("[OSAutoBalance]: 1:%i:", player );
-        
+        if (!IsClientConnected(player)) {
+            continue;  // Skip to the next player if the current one isn't connected
+        }
         if ( IsFakeClient ( player ) ) {
     PrintToConsoleAll("[OSAutoBalance]: 2:" );
             /* BOT */
@@ -211,53 +213,6 @@ public void fetchPlayerData ( ) {
         PrintToConsoleAll("[OSAutoBalance]:   - typeKD: %i", typeKD[player]);
     }
 
-
-/*
-        PrintToConsoleAll("[OSAutoBalance]: 1:");
-        GetClientAuthId(i, AuthId_Steam2, steamid, sizeof(steamid));
-        PrintToConsoleAll("[OSAutoBalance]: 2:%i:%s", i, nameKD[i]);
-        if ( typeKD[i] == 0 ) {
-
-            if ( playerIsReal ( i ) ) {
-                
-                if ( isValidSteamID ( steamid ) ) {
-                    strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
-                    strcopy(steamIds[i], 32, steamid);
-                    strcopy(shortIds[i], 32, shortSteamId);
-                    databaseGetKD ( i );
-                    typeKD[i] = 1;
-                } else {
-                    typeKD[i] = 0;
-                    steamIds[i] = "";
-                    shortIds[i] = "";
-                    databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
-                }
-            } else {
-                typeKD[i] = 0;
-                steamIds[i] = "";
-                shortIds[i] = "";
-                databaseKD[i] = 0.4 + ( GetRandomFloat ( 0.0, 0.6 ) );
-            }
-
-        }
-
-
-        int frags = GetClientFrags ( i );
-
-        int deaths = GetClientDeaths ( i );
-
-        if ( deaths == 0 ) {
-            gameKD[i] = 0.0 + frags;
-        } else {
-            gameKD[i] = 0.0 + ( frags / deaths );
-        }
-
-        PrintToConsoleAll("[OSAutoBalance]: 3:done:%s", nameKD[i]);
-        PrintToConsoleAll("[OSAutoBalance]:   - databaseKD: %0.2f", databaseKD[i]);
-        PrintToConsoleAll("[OSAutoBalance]:   - gameKD: %0.2f", gameKD[i]);
-        PrintToConsoleAll("[OSAutoBalance]:   - typeKD: %i", typeKD[i]);
-    }
-    */
 }
 
 public void databaseGetKD ( int player ) {
