@@ -15,6 +15,9 @@ Handle mysql = null;
 
 int weight = CS_TEAM_CT;
 
+int t_count = 0;
+int ct_count = 0;
+
 /* Name */
 char nameKD[MAXPLAYERS+1][64];
 
@@ -74,7 +77,7 @@ public void Event_RoundEnd ( Event event, const char[] name, bool dontBroadcast 
     setTeamWeight ( );
     int winTeam = GetEventInt(event, "winner");
     CreateTimer ( 3.0, handleRoundEndFetchData, winTeam );
-    CreateTimer ( 5.5, handleRoundEnd, winTeam );
+  //  CreateTimer ( 5.5, handleRoundEnd, winTeam );
 }
 
 public void Event_PlayerConnect ( Event event, const char[] name, bool dontBroadcast ) {
@@ -96,46 +99,65 @@ public Action handleRoundEndFetchData ( Handle timer, int winTeam ) {
     fetchPlayerData ( );
     calculateAverageKD ( );
     compareTeams ( );
+    evenTeams ( );
     return Plugin_Continue;
 }
 
-public Action handleRoundEnd ( Handle timer, int winTeam ) {
-    char nameStr[64];
-    int t_count = 0;
-    float terrorists = 0.0;
-    int ct_count = 0;
-    float counterterrorists = 0.0;
+public void evenTeams ( ) {
+    float ct_kd_sum = 0.0;
+    float t_kd_sum = 0.0;
+    int worstPlayer = -1;
+    float worstKD = 9999999.0; // Some large value for initial comparison
 
-    PrintToChatAll("[OSAutoBalance]: handleRoundEnd");
-
-//    checkConnection();
-
-    /* print all gathered player information */
-    for ( int i = 1; i < MAXPLAYERS; i++ ) {
-        if ( IsClientConnected ( i ) && ! IsClientSourceTV ( i ) ) {
-            /* get player name */
-            GetClientName ( i, nameStr, 64 );
-            strcopy(nameKD[i], 64, nameStr);
-            
-            if ( GetClientTeam(i) == CS_TEAM_CT ) {
-                team[i] = CS_TEAM_CT;
-                ct_count++;
-                counterterrorists = counterterrorists + ((dbKD[i]+gameKD[i])/2);
-                PrintToChatAll ( " - CT-value: %0.2f", counterterrorists);
-            } else if ( GetClientTeam(i) == CS_TEAM_T ) {
-                t_count++;
-                team[i] = CS_TEAM_T;
-                terrorists = terrorists + ((dbKD[i]+gameKD[i])/2);
-                PrintToChatAll ( " - T-value: %0.2f", terrorists);
+    // 1. Calculate the total KD for each team & identify the worst player
+    for (int i = 0; i < MAXPLAYERS; i++) {
+        if (!IsClientConnected(i)) continue;
+        
+        if (team[i] == CS_TEAM_CT) {
+            ct_kd_sum += avgKD[i];
+            if (avgKD[i] < worstKD) {
+                worstKD = avgKD[i];
+                worstPlayer = i;
+            }
+        } else if (team[i] == CS_TEAM_T) {
+            t_kd_sum += avgKD[i];
+            if (avgKD[i] < worstKD) {
+                worstKD = avgKD[i];
+                worstPlayer = i;
             }
         }
     }
 
-    return Plugin_Continue;
+    int teamSizeDifference = absoluteValue(ct_count - t_count);
+    if (teamSizeDifference <= 1) return;
 
+    int playersToMove = teamSizeDifference / 2;
+    float kdDifference = ct_kd_sum/ct_count - t_kd_sum/t_count;
+    int largerTeam = (ct_count > t_count) ? CS_TEAM_CT : CS_TEAM_T;
+
+    int foundPlayers = 0;
+    for (int i = 0; i < MAXPLAYERS && foundPlayers < playersToMove; i++) {
+        if (!IsClientConnected(i)) continue;
+        if (team[i] != largerTeam) continue;
+
+        if (absoluteValueFloat(kdDifference - avgKD[i]) <= kdDifference/playersToMove) {
+            PrintToChatAll("Suggest moving player %d to balance teams. Team KD Gap: %.2f, Player KD: %.2f", 
+                       i, kdDifference, avgKD[i]);
+            kdDifference -= avgKD[i];
+            foundPlayers++;
+        }
+    }
+
+    // Fallback: If we didn't find enough players, suggest the worst player
+    if (foundPlayers < playersToMove && worstPlayer != -1) {
+        PrintToChatAll("Fallback: Suggest moving player %d with KD %.2f to balance teams.", 
+                   worstPlayer, worstKD);
+    }
 }
-
 public void calculateAverageKD ( ) {
+    t_count = 0;
+    ct_count = 0;
+
     for ( int player = 1; player < MAXPLAYERS; player++ ) {
         if ( IsClientConnected ( player ) && ! IsClientSourceTV ( player ) ) {
             PrintToConsoleAll("Player %s | Initial KDs -> Database: %f, Game: %f", nameKD[player], dbKD[player], gameKD[player]);
@@ -167,6 +189,14 @@ public void calculateAverageKD ( ) {
 
                 PrintToConsoleAll(" - Weights -> Historical: %f, Game: %f", histWeight, currWeight);
                 PrintToConsoleAll(" - Average KD: %f", avgKD[player]);
+            }
+
+            if ( GetClientTeam(player) == CS_TEAM_CT ) {
+                ct_count++;
+                team[player] = CS_TEAM_CT;
+            } else if ( GetClientTeam(player) == CS_TEAM_T ) {
+                t_count++;
+                team[player] = CS_TEAM_T;
             }
             PrintToConsoleAll("-----------------------------");
         }
@@ -206,13 +236,9 @@ public void compareTeams ( ) {
 
     // With considering player weight
     int totalPlayers = team1Players + team2Players;
-    PrintToConsoleAll("Team 1 Player Count: %d", team1Players);
-    PrintToConsoleAll("Team 2 Player Count: %d", team2Players);
+
     float playerWeightForTeam1 = 1.0 * totalPlayers / (team1Players ? team1Players : 1);
     float playerWeightForTeam2 = 1.0 * totalPlayers / (team2Players ? team2Players : 1);
-
-    PrintToConsoleAll("Player Weight for Team 1: %f", playerWeightForTeam1);
-    PrintToConsoleAll("Player Weight for Team 2: %f", playerWeightForTeam2);
 
     float team1AvgWithWeight = team1TotalKD * playerWeightForTeam1 / team1Players;
     float team2AvgWithWeight = team2TotalKD * playerWeightForTeam2 / team2Players;
@@ -243,6 +269,7 @@ public void resetPlayerData ( int client ) {
 
 /* fetch player data */
 public void fetchPlayerData ( ) {
+    char nameStr[64];
     char steamid[32];
     char shortSteamId[32];
 
@@ -251,6 +278,9 @@ public void fetchPlayerData ( ) {
             continue;  // Skip to the next player if the current one isn't connected
         }
       
+        GetClientName ( player, nameStr, 64 );
+        strcopy(nameKD[player], 64, nameStr);
+
         // Set DbKD
         if ( typeKD[player] == 0 ) {
             GetClientAuthId(player, AuthId_Steam2, steamid, sizeof(steamid));
@@ -378,4 +408,16 @@ public bool isValidSteamID ( char authid[32] ) {
 }
 public bool stringContains ( char string[32], char match[32] ) {
     return ( StrContains ( string, match, false ) != -1 );
+}
+int absoluteValue(int number) {
+    if (number < 0) {
+        return -number;
+    }
+    return number;
+}
+float absoluteValueFloat(float number) {
+    if (number < 0) {
+        return -number;
+    }
+    return number;
 }
