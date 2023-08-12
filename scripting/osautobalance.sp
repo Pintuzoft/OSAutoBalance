@@ -107,7 +107,11 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
             /* get player name */
             GetClientName ( i, nameStr, 64 );
             strcopy(nameKD[i], 64, nameStr);
-            PrintToConsoleAll("[OSAutoBalance]: %s:%s:%f:%i", nameKD[i], shortIds[i], databaseKD[i], typeKD[i]);
+            float avgKD = (databaseKD[i] + gameKD[i]) / 2;
+            PrintToConsoleAll("[OSAutoBalance]: %s:%s:%i", nameKD[i], shortIds[i], typeKD[i]);
+            PrintToConsoleAll("[OSAutoBalance]:  - databaseKD: %0.2f", databaseKD[i]);
+            PrintToConsoleAll("[OSAutoBalance]:  - gameKD: %0.2f", gameKD[i]);
+            PrintToConsoleAll("[OSAutoBalance]:  - avgKD: %0.2f", avgKD);
             if ( GetClientTeam(i) == CS_TEAM_CT ) {
                 ct_count++;
                 counterterrorists = counterterrorists + ((databaseKD[i]+gameKD[i])/2);
@@ -148,30 +152,25 @@ public void resetPlayerData ( int client ) {
 public void fetchPlayerData ( ) {
     char steamid[32];
     char shortSteamId[32];
-    PrintToConsoleAll("[OSAutoBalance]: 0:" );
 
     for ( int player = 1; player < MAXPLAYERS; player++ ) {
-        PrintToConsoleAll("[OSAutoBalance]: 1:%i:", player );
         if (!IsClientConnected(player)) {
             continue;  // Skip to the next player if the current one isn't connected
         }
       
+        // Set DatabaseKD
         if ( typeKD[player] == 0 ) {
             GetClientAuthId(player, AuthId_Steam2, steamid, sizeof(steamid));
-            //if ( isValidSteamID ( steamid ) ) {
             strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
             strcopy(steamIds[player], 32, steamid);
             strcopy(shortIds[player], 32, shortSteamId);
             databaseGetKD ( player );
             if ( isValidSteamID ( steamid ) ) {
                 typeKD[player] = 1;
-            } 
-            //} else {
-            //    gameKD[player] = 0.6;
-            //}
+            }
         }
 
-      
+        // Set GameKD
         int frags = GetClientFrags ( player );
         int deaths = GetClientDeaths ( player );
         if ( deaths == 0 ) {
