@@ -112,7 +112,7 @@ PrintToConsoleAll("[OSAutoBalance]: 0:");
     // 1. Calculate the total KD for each team & identify the worst player
     for (int i = 0; i < MAXPLAYERS; i++) {
 PrintToConsoleAll("[OSAutoBalance]: 1:");
-        if (!IsClientConnected(i)) continue;
+        if ( ! IsClientConnected ( i ) || IsClientSourceTV ( i )) continue;
         
 PrintToConsoleAll("[OSAutoBalance]: 2:");
         if (team[i] == CS_TEAM_CT) {
@@ -148,7 +148,7 @@ PrintToConsoleAll("[OSAutoBalance]: 10:");
     int foundPlayers = 0;
     for (int i = 0; i < MAXPLAYERS && foundPlayers < playersToMove; i++) {
 PrintToConsoleAll("[OSAutoBalance]: 11:");
-        if (!IsClientConnected(i)) continue;
+        if ( ! IsClientConnected ( i ) || IsClientSourceTV ( i )) continue;
 PrintToConsoleAll("[OSAutoBalance]: 12:");
         if (team[i] != largerTeam) continue;
 PrintToConsoleAll("[OSAutoBalance]: 13:");
