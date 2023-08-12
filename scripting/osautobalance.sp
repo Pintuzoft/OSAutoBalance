@@ -18,21 +18,25 @@ int weight = CS_TEAM_CT;
 /* Name */
 char nameKD[MAXPLAYERS+1][64];
 
-/* KD from database */
-float databaseKD[MAXPLAYERS+1];
-
-/* KD from game */
-float gameKD[MAXPLAYERS+1];
-
 /* Player steamids */
 char steamIds[MAXPLAYERS+1][32];
 
 /* Player short steamids */
 char shortIds[MAXPLAYERS+1][32];
 
-/* KD type 1=db, 2=autogen */
+/* KD type 1=db, 0=check */
 int typeKD[MAXPLAYERS+1];
 
+float dbKD[MAXPLAYERS + 1];             // Database KD values.
+float gameKD[MAXPLAYERS + 1];           // Current KD values from the game.
+float avgKD[MAXPLAYERS + 1];            // Averaged KD values.
+
+// Configuration variables
+float strongHistWeight = 0.7;           // 70% weight for historical KD.
+float weakHistWeight = 0.3;             // 30% weight for historical KD.
+float normalHistWeight = 0.5;           // 50% weight for historical KD.
+float expectedPerformanceRange = 0.2;   // 20% range around historical KD.
+float defaultNewKD = 0.8;               // Default KD for new players.
 
 public Plugin myinfo = {
 	name = "OSAutoBalance",
@@ -87,6 +91,7 @@ public Action handleRoundEndFetchData ( Handle timer, int winTeam ) {
     PrintToChatAll("[OSAutoBalance]: handleRoundEndFetchData");
     /* Gather player data */
     fetchPlayerData ( );
+    calculateAverageKD ( );
     return Plugin_Continue;
 }
 
@@ -107,29 +112,62 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
             /* get player name */
             GetClientName ( i, nameStr, 64 );
             strcopy(nameKD[i], 64, nameStr);
-            float avgKD = (databaseKD[i] + gameKD[i]) / 2;
-            PrintToConsoleAll("[OSAutoBalance]: %s:%s:%i", nameKD[i], shortIds[i], typeKD[i]);
-            PrintToConsoleAll("[OSAutoBalance]:  - databaseKD: %0.2f", databaseKD[i]);
-            PrintToConsoleAll("[OSAutoBalance]:  - gameKD: %0.2f", gameKD[i]);
-            PrintToConsoleAll("[OSAutoBalance]:  - avgKD: %0.2f", avgKD);
+            
+//            PrintToConsoleAll("[OSAutoBalance]: %s:%s:%i", nameKD[i], shortIds[i], typeKD[i]);
+//            PrintToConsoleAll("[OSAutoBalance]:  - dbKD: %0.2f", dbKD[i]);
+//            PrintToConsoleAll("[OSAutoBalance]:  - gameKD: %0.2f", gameKD[i]);
+//            PrintToConsoleAll("[OSAutoBalance]:  - avgKD: %0.2f", avgKD);
             if ( GetClientTeam(i) == CS_TEAM_CT ) {
                 ct_count++;
-                counterterrorists = counterterrorists + ((databaseKD[i]+gameKD[i])/2);
+                counterterrorists = counterterrorists + ((dbKD[i]+gameKD[i])/2);
                 PrintToChatAll ( " - CT-value: %0.2f", counterterrorists);
             } else if ( GetClientTeam(i) == CS_TEAM_T ) {
                 t_count++;
-                terrorists = terrorists + ((databaseKD[i]+gameKD[i])/2);
+                terrorists = terrorists + ((dbKD[i]+gameKD[i])/2);
                 PrintToChatAll ( " - T-value: %0.2f", terrorists);
             }
         }
     }
 
-
     return Plugin_Continue;
 
 }
 
+public void calculateAverageKD ( ) {
+    for ( int player = 1; player < MAXPLAYERS; player++ ) {
+        PrintToConsoleAll("Player %d | Initial KDs -> Database: %f, Game: %f", player, dbKD[player], gameKD[player]);
 
+        if ( dbKD[player] == -1.0 ) {
+            avgKD[player] = (defaultNewKD + gameKD[player]) / 2.0;
+            PrintToConsoleAll("Player %d | Average KD (New/Bot): %f", player, avgKD[player]);
+
+        } else {
+            float lowerBound = dbKD[player] - expectedPerformanceRange;
+            float upperBound = dbKD[player] + expectedPerformanceRange;
+            float histWeight;
+
+            if ( gameKD[player] > upperBound ) {
+                histWeight = strongHistWeight;
+                PrintToConsoleAll("Player %d | Status: Over-Performing", player);
+
+            } else if ( gameKD[player] < lowerBound ) {
+                histWeight = weakHistWeight;
+                PrintToConsoleAll("Player %d | Status: Under-Performing", player);
+            
+            } else {
+                histWeight = normalHistWeight;
+                PrintToConsoleAll("Player %d | Status: Performing as Expected", player);
+            }
+
+            float currWeight = 1.0 - histWeight;
+            avgKD[player] = (histWeight * dbKD[player]) + (currWeight * gameKD[player]);
+
+            PrintToConsoleAll("Player %d | Weights -> Historical: %f, Game: %f", player, histWeight, currWeight);
+            PrintToConsoleAll("Player %d | Average KD: %f", player, avgKD[player]);
+        }
+        PrintToConsoleAll("Player %d | -----------------------------", player);
+    }
+}
 
 
 public void resetAllData ( ) {
@@ -143,7 +181,7 @@ public void resetPlayerData ( int client ) {
     nameKD[client] = "";
     steamIds[client] = "";
     shortIds[client] = "";
-    databaseKD[client] = 0.0;
+    dbKD[client] = 0.0;
     gameKD[client] = 0.0;
     typeKD[client] = 0;
 }
@@ -158,7 +196,7 @@ public void fetchPlayerData ( ) {
             continue;  // Skip to the next player if the current one isn't connected
         }
       
-        // Set DatabaseKD
+        // Set DbKD
         if ( typeKD[player] == 0 ) {
             GetClientAuthId(player, AuthId_Steam2, steamid, sizeof(steamid));
             strcopy(shortSteamId, sizeof(shortSteamId), steamid[8]);
@@ -180,7 +218,7 @@ public void fetchPlayerData ( ) {
         }
 
         PrintToConsoleAll("[OSAutoBalance]: 24:%i:done:%s", player, nameKD[player]);
-        PrintToConsoleAll("[OSAutoBalance]:   - databaseKD: %0.2f", databaseKD[player]);
+        PrintToConsoleAll("[OSAutoBalance]:   - dbKD: %0.2f", dbKD[player]);
         PrintToConsoleAll("[OSAutoBalance]:   - gameKD: %0.2f", gameKD[player]);
         PrintToConsoleAll("[OSAutoBalance]:   - typeKD: %i", typeKD[player]);
     }
@@ -194,7 +232,7 @@ public void databaseGetKD ( int player ) {
     if ( ( stmt = SQL_PrepareQuery ( mysql, "SELECT kd FROM player WHERE steamid = ?", error, sizeof(error) ) ) == null ) {
         SQL_GetError ( mysql, error, sizeof(error));
         PrintToConsoleAll("[databaseGetKD]: Failed to prepare query[0x01] (error: %s)", error);
-        databaseKD[player] = 0.4;
+        dbKD[player] = -1.0;
         return;
     }
 
@@ -202,14 +240,14 @@ public void databaseGetKD ( int player ) {
     if ( ! SQL_Execute ( stmt ) ) {
         SQL_GetError ( mysql, error, sizeof(error));
         PrintToConsoleAll("[databaseGetKD]: Failed to query[0x02] (error: %s)", error);
-        databaseKD[player] = 0.4;
+        dbKD[player] = -1.0;
         return;
     }
 
     if ( SQL_FetchRow ( stmt ) ) {
-        databaseKD[player] = SQL_FetchFloat ( stmt, 0 );
+        dbKD[player] = SQL_FetchFloat ( stmt, 0 );
     } else {
-        databaseKD[player] = 0.4;
+        dbKD[player] = -1.0;
 
     }
 
@@ -217,10 +255,6 @@ public void databaseGetKD ( int player ) {
         delete stmt;
     }
 }
-
-
-
- 
 
 
 public void setTeamWeight ( ) {
