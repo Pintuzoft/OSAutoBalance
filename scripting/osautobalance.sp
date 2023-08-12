@@ -135,37 +135,39 @@ public Action handleRoundEnd ( Handle timer, int winTeam ) {
 
 public void calculateAverageKD ( ) {
     for ( int player = 1; player < MAXPLAYERS; player++ ) {
-        PrintToConsoleAll("Player %d | Initial KDs -> Database: %f, Game: %f", player, dbKD[player], gameKD[player]);
+        if ( IsClientConnected ( player ) && ! IsClientSourceTV ( player ) ) {
+            PrintToConsoleAll("Player %s | Initial KDs -> Database: %f, Game: %f", nameKD[player], dbKD[player], gameKD[player]);
 
-        if ( dbKD[player] == -1.0 ) {
-            avgKD[player] = (defaultNewKD + gameKD[player]) / 2.0;
-            PrintToConsoleAll("Player %d | Average KD (New/Bot): %f", player, avgKD[player]);
+            if ( dbKD[player] == -1.0 ) {
+                avgKD[player] = (defaultNewKD + gameKD[player]) / 2.0;
+                PrintToConsoleAll(" - Average KD (New/Bot): %f", avgKD[player]);
 
-        } else {
-            float lowerBound = dbKD[player] - expectedPerformanceRange;
-            float upperBound = dbKD[player] + expectedPerformanceRange;
-            float histWeight;
-
-            if ( gameKD[player] > upperBound ) {
-                histWeight = strongHistWeight;
-                PrintToConsoleAll("Player %d | Status: Over-Performing", player);
-
-            } else if ( gameKD[player] < lowerBound ) {
-                histWeight = weakHistWeight;
-                PrintToConsoleAll("Player %d | Status: Under-Performing", player);
-            
             } else {
-                histWeight = normalHistWeight;
-                PrintToConsoleAll("Player %d | Status: Performing as Expected", player);
+                float lowerBound = dbKD[player] - expectedPerformanceRange;
+                float upperBound = dbKD[player] + expectedPerformanceRange;
+                float histWeight;
+
+                if ( gameKD[player] > upperBound ) {
+                    histWeight = strongHistWeight;
+                    PrintToConsoleAll(" - Status: Over-Performing");
+
+                } else if ( gameKD[player] < lowerBound ) {
+                    histWeight = weakHistWeight;
+                    PrintToConsoleAll(" - Status: Under-Performing");
+                
+                } else {
+                    histWeight = normalHistWeight;
+                    PrintToConsoleAll(" - Status: Performing as Expected");
+                }
+
+                float currWeight = 1.0 - histWeight;
+                avgKD[player] = (histWeight * dbKD[player]) + (currWeight * gameKD[player]);
+
+                PrintToConsoleAll(" - Weights -> Historical: %f, Game: %f", histWeight, currWeight);
+                PrintToConsoleAll(" - Average KD: %f", avgKD[player]);
             }
-
-            float currWeight = 1.0 - histWeight;
-            avgKD[player] = (histWeight * dbKD[player]) + (currWeight * gameKD[player]);
-
-            PrintToConsoleAll("Player %d | Weights -> Historical: %f, Game: %f", player, histWeight, currWeight);
-            PrintToConsoleAll("Player %d | Average KD: %f", player, avgKD[player]);
+            PrintToConsoleAll("Player %s | -----------------------------", nameKD[player]);
         }
-        PrintToConsoleAll("Player %d | -----------------------------", player);
     }
 }
 
