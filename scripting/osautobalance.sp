@@ -180,7 +180,7 @@ public void compareTeams ( ) {
     int team1Players = 0;
     int team2Players = 0;
 
-    for (int player = 1; player <= MAXPLAYERS; player++) {
+    for (int player = 1; player < MAXPLAYERS; player++) {
         if ( ! IsClientConnected(player) ) {
             continue;
         }
