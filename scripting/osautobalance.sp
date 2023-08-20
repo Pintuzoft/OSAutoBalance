@@ -156,7 +156,9 @@ for (int i = 1; i < MaxClients; i++)
             if (absoluteValueFloat(totalKdDifferenceNeeded/playersToMove - avgKD[i]) <= kdDifference)
             {
                 // Debugging statements
-                PrintToConsoleAll("Player %d with KD %f fits the KD gap", i, avgKD[i]);
+                PrintToConsoleAll("Player %d with KD %f | Total KD Diff Needed: %f | Avg KD Diff per Player: %f | Current Player's KD Deviation: %f", 
+                              i, avgKD[i], totalKdDifferenceNeeded, totalKdDifferenceNeeded/playersToMove, 
+                              absoluteValueFloat(totalKdDifferenceNeeded/playersToMove - avgKD[i]));
 
                 // ... rest of the logic
             }
