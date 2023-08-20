@@ -155,7 +155,7 @@ PrintToConsoleAll("[OSAutoBalance]: 13:");
 
         if (absoluteValueFloat(kdDifference - avgKD[i]) <= kdDifference/playersToMove) {
 PrintToConsoleAll("[OSAutoBalance]: 14:");
-            PrintToConsoleAll("Suggest moving (diff) player %d to balance teams. Team KD Gap: %.2f, Player KD: %.2f", i, kdDifference, avgKD[i]);
+            PrintToConsoleAll("Suggest moving (diff) [%i]player %d to balance teams. Team KD Gap: %.2f, Player KD: %.2f", team[i], i, kdDifference, avgKD[i]);
             kdDifference -= avgKD[i];
             foundPlayers++;
 PrintToConsoleAll("[OSAutoBalance]: 15:");
