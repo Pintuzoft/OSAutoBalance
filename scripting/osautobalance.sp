@@ -137,17 +137,17 @@ PrintToConsoleAll("[OSAutoBalance]: 8:");
 PrintToConsoleAll("[OSAutoBalance]: 9:");
     }
 
-PrintToConsoleAll("[OSAutoBalance]: 10:");
     int teamSizeDifference = absoluteValue(ct_count - t_count);
     if (teamSizeDifference <= 1) return;
 
     int playersToMove = teamSizeDifference / 2;
     float kdDifference = ct_kd_sum/ct_count - t_kd_sum/t_count;
     int largerTeam = (ct_count > t_count) ? CS_TEAM_CT : CS_TEAM_T;
+PrintToConsoleAll("[OSAutoBalance]: 10:%.2f:%.2f:%i", ct_kd_sum, t_kd_sum, teamSizeDifference);
 
     int foundPlayers = 0;
-    for (int i = 1; i < MAXPLAYERS && foundPlayers < playersToMove; i++) {
-PrintToConsoleAll("[OSAutoBalance]: 11:");
+    for (int i = 1; i < MAXPLAYERS && foundPlayers <= playersToMove; i++) {
+PrintToConsoleAll("[OSAutoBalance]: 11:%i", playersToMove);
         if ( ! IsClientConnected ( i ) || IsClientSourceTV ( i )) continue;
 PrintToConsoleAll("[OSAutoBalance]: 12:");
         if (team[i] != largerTeam) continue;
