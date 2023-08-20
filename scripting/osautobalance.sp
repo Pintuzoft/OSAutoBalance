@@ -145,13 +145,15 @@ PrintToConsoleAll("[OSAutoBalance]: 9:");
     int largerTeam = (ct_count > t_count) ? CS_TEAM_CT : CS_TEAM_T;
 
 
-for (int i = 1; i <= MaxClients; i++)
+float totalKdDifferenceNeeded = kdDifference * playersToMove;
+
+for (int i = 1; i < MaxClients; i++)
 {
     if (IsClientInGame(i))
     {
         if (team[i] == largerTeam)
         {
-            if (absoluteValueFloat(kdDifference - avgKD[i]) <= kdDifference/playersToMove)
+            if (absoluteValueFloat(totalKdDifferenceNeeded/playersToMove - avgKD[i]) <= kdDifference)
             {
                 // Debugging statements
                 PrintToConsoleAll("Player %d with KD %f fits the KD gap", i, avgKD[i]);
