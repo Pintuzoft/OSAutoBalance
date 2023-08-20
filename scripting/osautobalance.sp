@@ -17,7 +17,7 @@ int weight = CS_TEAM_CT;
 
 int t_count = 0;
 int ct_count = 0;
-
+int bombSites = 0;
 /* Name */
 char nameKD[MAXPLAYERS+1][64];
 
@@ -97,198 +97,54 @@ public Action handleRoundEndFetchData ( Handle timer, int winTeam ) {
     PrintToChatAll("[OSAutoBalance]: handleRoundEndFetchData");
     /* Gather player data */
     fetchPlayerData ( );
-    calculateAverageKD ( );
-    compareTeams ( );
-    evenTeams ( );
+
+    balanceTeamsSeparated ( 2 );
     return Plugin_Continue;
 }
 
-public void evenTeams ( ) {
-    float ct_kd_sum = 0.0;
-    float t_kd_sum = 0.0;
-    int worstPlayer = -1;
-    float worstKD = 9999999.0; // Some large value for initial comparison
-PrintToConsoleAll("[OSAutoBalance]: 0:");
-    // 1. Calculate the total KD for each team & identify the worst player
-    for (int i = 1; i < MAXPLAYERS; i++) {
-PrintToConsoleAll("[OSAutoBalance]: 1:");
-        if ( ! IsClientConnected ( i ) || IsClientSourceTV ( i )) continue;
-        
-PrintToConsoleAll("[OSAutoBalance]: 2:");
-        if (team[i] == CS_TEAM_CT) {
-PrintToConsoleAll("[OSAutoBalance]: 3:");
-            ct_kd_sum += avgKD[i];
-            if (avgKD[i] < worstKD) {
-PrintToConsoleAll("[OSAutoBalance]: 4:");
-                worstKD = avgKD[i];
-                worstPlayer = i;
-            }
-PrintToConsoleAll("[OSAutoBalance]: 5:");
-        } else if (team[i] == CS_TEAM_T) {
-PrintToConsoleAll("[OSAutoBalance]: 6:");
-            t_kd_sum += avgKD[i];
-            if (avgKD[i] < worstKD) {
-PrintToConsoleAll("[OSAutoBalance]: 7:");
-                worstKD = avgKD[i];
-                worstPlayer = i;
-            }
-PrintToConsoleAll("[OSAutoBalance]: 8:");
-        }
-PrintToConsoleAll("[OSAutoBalance]: 9:");
+
+
+public void balanceTeamsSeparated(int bombsiteCount) {
+    // Step 1: Equalize Team Size
+    if (absoluteValue(ct_count - t_count) > 1) {
+        adjustTeamSizesBasedOnBombsites(bombsiteCount);
+        return; // Since team sizes were imbalanced by more than 1, we adjust and exit.
     }
 
-    int teamSizeDifference = absoluteValue(ct_count - t_count);
-    if (teamSizeDifference <= 1) return;
-
-    int playersToMove = teamSizeDifference / 2;
-    float kdDifference = ct_kd_sum/ct_count - t_kd_sum/t_count;
-    int largerTeam = (ct_count > t_count) ? CS_TEAM_CT : CS_TEAM_T;
-
-
-float totalKdDifferenceNeeded = kdDifference * playersToMove;
-
-for (int i = 1; i < MaxClients; i++)
-{
-    if (IsClientInGame(i))
-    {
-        if (team[i] == largerTeam)
-        {
-            if (absoluteValueFloat(totalKdDifferenceNeeded/playersToMove - avgKD[i]) <= kdDifference)
-            {
-                // Debugging statements
-                PrintToConsoleAll("Player %d with KD %f | Total KD Diff Needed: %f | Avg KD Diff per Player: %f | Current Player's KD Deviation: %f", 
-                              i, avgKD[i], totalKdDifferenceNeeded, totalKdDifferenceNeeded/playersToMove, 
-                              absoluteValueFloat(totalKdDifferenceNeeded/playersToMove - avgKD[i]));
-
-                // ... rest of the logic
-            }
-        }
-    }
+    // Step 2: Balance Based on KD
+    // (No need to process this in our current debugging scenario)
 }
-return;
-PrintToConsoleAll("[OSAutoBalance]: 10:%.2f:%.2f:%i", ct_kd_sum, t_kd_sum, teamSizeDifference);
 
-    int foundPlayers = 0;
-    for (int i = 1; i < MAXPLAYERS && foundPlayers <= playersToMove; i++) {
-PrintToConsoleAll("[OSAutoBalance]: 11:%i", playersToMove);
-        if ( ! IsClientConnected ( i ) || IsClientSourceTV ( i )) continue;
-PrintToConsoleAll("[OSAutoBalance]: 12:");
-        if (team[i] != largerTeam) continue;
-PrintToConsoleAll("[OSAutoBalance]: 13:");
+public void adjustTeamSizesBasedOnBombsites(int bombsiteCount) {
+    int desiredCTCount = ct_count, desiredTCount = t_count;
+    getDesiredTeamSizes(bombsiteCount, desiredCTCount, desiredTCount);
 
-        if (absoluteValueFloat(kdDifference - avgKD[i]) <= kdDifference/playersToMove) {
-PrintToConsoleAll("[OSAutoBalance]: 14:");
-            PrintToConsoleAll("Suggest moving (diff) [%i]player %d to balance teams. Team KD Gap: %.2f, Player KD: %.2f", team[i], i, kdDifference, avgKD[i]);
-            kdDifference -= avgKD[i];
-            foundPlayers++;
-PrintToConsoleAll("[OSAutoBalance]: 15:");
-        }
-PrintToConsoleAll("[OSAutoBalance]: 16:");
-    }
-PrintToConsoleAll("[OSAutoBalance]: 17:");
-
-    // Fallback: If we didn't find enough players, suggest the worst player
-    if (foundPlayers < playersToMove && worstPlayer != -1) {
-PrintToConsoleAll("[OSAutoBalance]: 18:");
-        PrintToConsoleAll("Fallback: Suggest moving (worst) player %d with KD %.2f to balance teams.", worstPlayer, worstKD);
-PrintToConsoleAll("[OSAutoBalance]: 19:");
-    }
-PrintToConsoleAll("[OSAutoBalance]: 20:");
-}
-public void calculateAverageKD ( ) {
-    t_count = 0;
-    ct_count = 0;
-
-    for ( int player = 1; player < MAXPLAYERS; player++ ) {
-        if ( IsClientConnected ( player ) && ! IsClientSourceTV ( player ) ) {
-            PrintToConsoleAll("Player %s | Initial KDs -> Database: %f, Game: %f", nameKD[player], dbKD[player], gameKD[player]);
-
-            if ( dbKD[player] == -1.0 ) {
-                avgKD[player] = (defaultNewKD + gameKD[player]) / 2.0;
-                PrintToConsoleAll(" - Average KD (New/Bot): %f", avgKD[player]);
-
-            } else {
-                float lowerBound = dbKD[player] - expectedPerformanceRange;
-                float upperBound = dbKD[player] + expectedPerformanceRange;
-                float histWeight;
-
-                if ( gameKD[player] > upperBound ) {
-                    histWeight = strongHistWeight;
-                    PrintToConsoleAll(" - Status: Over-Performing");
-
-                } else if ( gameKD[player] < lowerBound ) {
-                    histWeight = weakHistWeight;
-                    PrintToConsoleAll(" - Status: Under-Performing");
-                
-                } else {
-                    histWeight = normalHistWeight;
-                    PrintToConsoleAll(" - Status: Performing as Expected");
-                }
-
-                float currWeight = 1.0 - histWeight;
-                avgKD[player] = (histWeight * dbKD[player]) + (currWeight * gameKD[player]);
-
-                PrintToConsoleAll(" - Weights -> Historical: %f, Game: %f", histWeight, currWeight);
-                PrintToConsoleAll(" - Average KD: %f", avgKD[player]);
-            }
-
-            if ( GetClientTeam(player) == CS_TEAM_CT ) {
-                ct_count++;
-                team[player] = CS_TEAM_CT;
-            } else if ( GetClientTeam(player) == CS_TEAM_T ) {
-                t_count++;
-                team[player] = CS_TEAM_T;
-            }
-            PrintToConsoleAll("-----------------------------");
-        }
+    int playersToMove = 0;
+    if (ct_count - t_count > 1) {
+        // CTs have more than 1 player advantage
+        playersToMove = (ct_count - t_count) / 2;
+        PrintToConsoleAll("Move %d CT players to T to equalize team size.", playersToMove);
+    } else if (t_count - ct_count > 1) {
+        // Ts have more than 1 player advantage
+        playersToMove = (t_count - ct_count) / 2;
+        PrintToConsoleAll("Move %d T players to CT to equalize team size.", playersToMove);
     }
 }
 
-public void compareTeams ( ) {
-    float team1TotalKD = 0.0;
-    float team2TotalKD = 0.0;
+// You'd have to have a function for getting desired team sizes.
+// For simplicity, I'm implementing it directly in the pseudo code.
+public void getDesiredTeamSizes(int bombsiteCount, int &desiredCTCount, int &desiredTCount) {
+    int totalPlayers = desiredCTCount + desiredTCount;
 
-    int team1Players = 0;
-    int team2Players = 0;
-
-    for (int player = 1; player < MAXPLAYERS; player++) {
-        if ( ! IsClientConnected(player) ) {
-            continue;
-        }
-
-        if ( team[player] == CS_TEAM_T ) {
-            team1TotalKD += avgKD[player];
-            team1Players++;
-
-        } else if ( team[player] == CS_TEAM_CT ) {
-            team2TotalKD += avgKD[player];
-            team2Players++;
-        }
+    if(bombsiteCount == 0) {
+        desiredCTCount = totalPlayers / 2;
+        desiredTCount = totalPlayers - desiredCTCount;
+    } else {
+        desiredCTCount = (totalPlayers / 2) + 1;
+        desiredTCount = totalPlayers - desiredCTCount;
     }
-
-    // Without considering player weight
-    float team1AvgWithoutWeight = team1Players ? team1TotalKD / team1Players : 0.0;
-    float team2AvgWithoutWeight = team2Players ? team2TotalKD / team2Players : 0.0;
-
-    PrintToConsoleAll("Without Player Weight:");
-    PrintToConsoleAll(" - Team 1 Avg KD: %f", team1AvgWithoutWeight);
-    PrintToConsoleAll(" - Team 2 Avg KD: %f", team2AvgWithoutWeight);
-    PrintToConsoleAll("-----------------------------");
-
-    // With considering player weight
-    int totalPlayers = team1Players + team2Players;
-
-    float playerWeightForTeam1 = 1.0 * totalPlayers / (team1Players ? team1Players : 1);
-    float playerWeightForTeam2 = 1.0 * totalPlayers / (team2Players ? team2Players : 1);
-
-    float team1AvgWithWeight = team1TotalKD * playerWeightForTeam1 / team1Players;
-    float team2AvgWithWeight = team2TotalKD * playerWeightForTeam2 / team2Players;
-
-    PrintToConsoleAll("With Player Weight:");
-    PrintToConsoleAll(" - Team 1 Avg KD: %f", team1AvgWithWeight);
-    PrintToConsoleAll(" - Team 2 Avg KD: %f", team2AvgWithWeight);
-    PrintToConsoleAll("-----------------------------");
 }
+
 
 
 public void resetAllData ( ) {
@@ -313,7 +169,8 @@ public void fetchPlayerData ( ) {
     char nameStr[64];
     char steamid[32];
     char shortSteamId[32];
-
+    t_count = 0;
+    ct_count = 0;
     for ( int player = 1; player < MAXPLAYERS; player++ ) {
         if (!IsClientConnected(player)) {
             continue;  // Skip to the next player if the current one isn't connected
@@ -321,7 +178,13 @@ public void fetchPlayerData ( ) {
       
         GetClientName ( player, nameStr, 64 );
         strcopy(nameKD[player], 64, nameStr);
-
+        int teamId = GetClientTeam ( player );
+        team[player] = teamId;
+        if ( teamId == 2 ) {
+            t_count++;
+        } else if ( teamId == 3 ) {
+            ct_count++;
+        }
         // Set DbKD
         if ( typeKD[player] == 0 ) {
             GetClientAuthId(player, AuthId_Steam2, steamid, sizeof(steamid));
@@ -384,8 +247,8 @@ public void databaseGetKD ( int player ) {
 
 
 public void setTeamWeight ( ) {
-    int bombSites = 0;
     int entity = 0;
+    bombSites = 0;
     while ( ( entity = FindEntityByClassname ( entity, "func_bomb_target" ) ) != INVALID_ENT_REFERENCE ) {
         bombSites++;
     }
