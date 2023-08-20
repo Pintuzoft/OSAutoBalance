@@ -155,8 +155,7 @@ PrintToConsoleAll("[OSAutoBalance]: 13:");
 
         if (absoluteValueFloat(kdDifference - avgKD[i]) <= kdDifference/playersToMove) {
 PrintToConsoleAll("[OSAutoBalance]: 14:");
-            PrintToChatAll("Suggest moving player %d to balance teams. Team KD Gap: %.2f, Player KD: %.2f", 
-                       i, kdDifference, avgKD[i]);
+            PrintToConsoleAll("Suggest moving (diff) player %d to balance teams. Team KD Gap: %.2f, Player KD: %.2f", i, kdDifference, avgKD[i]);
             kdDifference -= avgKD[i];
             foundPlayers++;
 PrintToConsoleAll("[OSAutoBalance]: 15:");
@@ -168,8 +167,7 @@ PrintToConsoleAll("[OSAutoBalance]: 17:");
     // Fallback: If we didn't find enough players, suggest the worst player
     if (foundPlayers < playersToMove && worstPlayer != -1) {
 PrintToConsoleAll("[OSAutoBalance]: 18:");
-        PrintToChatAll("Fallback: Suggest moving player %d with KD %.2f to balance teams.", 
-                   worstPlayer, worstKD);
+        PrintToConsoleAll("Fallback: Suggest moving (worst) player %d with KD %.2f to balance teams.", worstPlayer, worstKD);
 PrintToConsoleAll("[OSAutoBalance]: 19:");
     }
 PrintToConsoleAll("[OSAutoBalance]: 20:");
