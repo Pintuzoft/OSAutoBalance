@@ -18,6 +18,7 @@ int weight = CS_TEAM_CT;
 int t_count = 0;
 int ct_count = 0;
 int bombSites = 0;
+
 /* Name */
 char nameKD[MAXPLAYERS+1][64];
 
@@ -98,16 +99,16 @@ public Action handleRoundEndFetchData ( Handle timer, int winTeam ) {
     /* Gather player data */
     fetchPlayerData ( );
 
-    balanceTeamsSeparated ( 2 );
+    balanceTeamsSeparated ( );
     return Plugin_Continue;
 }
 
 
 
-public void balanceTeamsSeparated(int bombsiteCount) {
+public void balanceTeamsSeparated ( ) {
     // Step 1: Equalize Team Size
     if (absoluteValue(ct_count - t_count) > 1) {
-        adjustTeamSizesBasedOnBombsites(bombsiteCount);
+        adjustTeamSizesBasedOnBombsites ( );
         return; // Since team sizes were imbalanced by more than 1, we adjust and exit.
     }
 
@@ -115,9 +116,9 @@ public void balanceTeamsSeparated(int bombsiteCount) {
     // (No need to process this in our current debugging scenario)
 }
 
-public void adjustTeamSizesBasedOnBombsites(int bombsiteCount) {
+public void adjustTeamSizesBasedOnBombsites ( ) {
     int desiredCTCount = ct_count, desiredTCount = t_count;
-    getDesiredTeamSizes(bombsiteCount, desiredCTCount, desiredTCount);
+    getDesiredTeamSizes( desiredCTCount, desiredTCount );
 
     int playersToMove = 0;
     if (ct_count - t_count > 1) {
@@ -131,20 +132,36 @@ public void adjustTeamSizesBasedOnBombsites(int bombsiteCount) {
     }
 }
 
-// You'd have to have a function for getting desired team sizes.
-// For simplicity, I'm implementing it directly in the pseudo code.
-public void getDesiredTeamSizes(int bombsiteCount, int &desiredCTCount, int &desiredTCount) {
+public void getDesiredTeamSizes(int &desiredCTCount, int &desiredTCount) {
     int totalPlayers = desiredCTCount + desiredTCount;
 
-    if(bombsiteCount == 0) {
+    if (totalPlayers % 2 == 0) {  // Even number of players
         desiredCTCount = totalPlayers / 2;
-        desiredTCount = totalPlayers - desiredCTCount;
-    } else {
-        desiredCTCount = (totalPlayers / 2) + 1;
-        desiredTCount = totalPlayers - desiredCTCount;
+        desiredTCount = totalPlayers / 2;
+
+    } else {  // Odd number of players
+        if (bombSites == 0) {  
+            // Hostage map, so give CT the advantage
+            desiredCTCount = (totalPlayers / 2) + 1;
+            desiredTCount = totalPlayers / 2;
+
+        } else if (bombSites == 1) {  
+            // Only 1 bombsite, so give T the advantage
+            desiredCTCount = totalPlayers / 2;
+            desiredTCount = (totalPlayers / 2) + 1;
+
+        } else if (bombSites == 2) {  
+            // 2 bombsites, so give CT the advantage
+            desiredCTCount = (totalPlayers / 2) + 1;
+            desiredTCount = totalPlayers / 2;
+
+        } else {  
+            // For unforeseen cases, just balance them evenly
+            desiredCTCount = totalPlayers / 2;
+            desiredTCount = totalPlayers / 2;
+        }
     }
 }
-
 
 
 public void resetAllData ( ) {
