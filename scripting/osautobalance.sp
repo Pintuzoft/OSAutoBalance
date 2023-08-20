@@ -143,6 +143,25 @@ PrintToConsoleAll("[OSAutoBalance]: 9:");
     int playersToMove = teamSizeDifference / 2;
     float kdDifference = ct_kd_sum/ct_count - t_kd_sum/t_count;
     int largerTeam = (ct_count > t_count) ? CS_TEAM_CT : CS_TEAM_T;
+
+
+for (int i = 1; i <= MaxClients; i++)
+{
+    if (IsClientInGame(i))
+    {
+        if (team[i] == largerTeam)
+        {
+            if (absoluteValueFloat(kdDifference - avgKD[i]) <= kdDifference/playersToMove)
+            {
+                // Debugging statements
+                PrintToServer("Player %d with KD %f fits the KD gap", i, avgKD[i]);
+
+                // ... rest of the logic
+            }
+        }
+    }
+}
+return;
 PrintToConsoleAll("[OSAutoBalance]: 10:%.2f:%.2f:%i", ct_kd_sum, t_kd_sum, teamSizeDifference);
 
     int foundPlayers = 0;
