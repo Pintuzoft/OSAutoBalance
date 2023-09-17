@@ -45,6 +45,10 @@ float normalHistWeight = 0.5;           // 50% weight for historical KD.
 float expectedPerformanceRange = 0.2;   // 20% range around historical KD.
 float defaultNewKD = 0.8;               // Default KD for new players.
 
+// work vars
+int desiredCTCount;
+int desiredTCount;
+
 public Plugin myinfo = {
 	name = "OSAutoBalance",
 	author = "Pintuz",
@@ -120,8 +124,7 @@ public void balanceTeamsSeparated ( ) {
 }
 
 public void adjustTeamSizesBasedOnBombsites() {
-    int desiredCTCount, desiredTCount;
-    getDesiredTeamSizes(desiredCTCount, desiredTCount);
+    setDesiredTeamSizes ( );
     PrintToConsoleAll ("CT:%d T:%d [%d:%d]", ct_count, t_count, desiredCTCount, desiredTCount);
     if (ct_count > desiredCTCount) {
         // Move excess CT players to T
@@ -136,8 +139,8 @@ public void adjustTeamSizesBasedOnBombsites() {
     }
 }
 
-public void getDesiredTeamSizes(int &desiredCTCount, int &desiredTCount) {
-    int totalPlayers = desiredCTCount + desiredTCount;
+public void setDesiredTeamSizes ( ) {
+    int totalPlayers = ct_count + t_count;
 
     if (totalPlayers % 2 == 0) {  // Even number of players
         desiredCTCount = totalPlayers / 2;
