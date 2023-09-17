@@ -100,9 +100,12 @@ public Action handleRoundEndFetchData ( Handle timer, int winTeam ) {
     fetchPlayerData ( );
 
     balanceTeamsSeparated ( );
+
+    /* Calculate player swaps based on KD values */
+    // CalculatePlayerSwap ( ); // Use your logic to determine if there are two bomb sites
+    
     return Plugin_Continue;
 }
-
 
 
 public void balanceTeamsSeparated ( ) {
@@ -116,19 +119,20 @@ public void balanceTeamsSeparated ( ) {
     // (No need to process this in our current debugging scenario)
 }
 
-public void adjustTeamSizesBasedOnBombsites ( ) {
-    int desiredCTCount = ct_count, desiredTCount = t_count;
-    getDesiredTeamSizes( desiredCTCount, desiredTCount );
+public void adjustTeamSizesBasedOnBombsites() {
+    int desiredCTCount, desiredTCount;
+    getDesiredTeamSizes(desiredCTCount, desiredTCount);
 
-    int playersToMove = 0;
-    if (ct_count - t_count > 1) {
-        // CTs have more than 1 player advantage
-        playersToMove = (ct_count - t_count) / 2;
+    if (ct_count > desiredCTCount) {
+        // Move excess CT players to T
+        int playersToMove = ct_count - desiredCTCount;
         PrintToConsoleAll("Move %d CT players to T to equalize team size.", playersToMove);
-    } else if (t_count - ct_count > 1) {
-        // Ts have more than 1 player advantage
-        playersToMove = (t_count - ct_count) / 2;
+        // Implement the logic to move players here.
+    } else if (t_count > desiredTCount) {
+        // Move excess T players to CT
+        int playersToMove = t_count - desiredTCount;
         PrintToConsoleAll("Move %d T players to CT to equalize team size.", playersToMove);
+        // Implement the logic to move players here.
     }
 }
 
