@@ -122,7 +122,7 @@ public void balanceTeamsSeparated ( ) {
 public void adjustTeamSizesBasedOnBombsites() {
     int desiredCTCount, desiredTCount;
     getDesiredTeamSizes(desiredCTCount, desiredTCount);
-
+    PrintToConsoleAll ("CT:%d T:%d [%d:%d]", ct_count, t_count, desiredCTCount, desiredTCount);
     if (ct_count > desiredCTCount) {
         // Move excess CT players to T
         int playersToMove = ct_count - desiredCTCount;
